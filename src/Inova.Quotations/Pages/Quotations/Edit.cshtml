@@ -1,0 +1,361 @@
+@page "/Quotations/Edit/{id:int?}"
+@model Inova.Quotations.Pages.Quotations.EditModel
+@{
+    ViewData["Title"] = Model.IsNew ? "New quotation" : Model.Input.JobNo;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash">@Model.Flash</div>
+}
+
+<form method="post" enctype="multipart/form-data" id="quotation-form">
+    <input type="hidden" asp-for="Input.Id" />
+
+    <div class="page-head">
+        <h1>@(Model.IsNew ? "New quotation" : $"Quotation {Model.Input.JobNo}")</h1>
+        <span class="spacer"></span>
+        @if (!Model.IsNew)
+        {
+            <a class="btn ghost" asp-page="/Quotations/Print" asp-route-id="@Model.Input.Id" target="_blank">Preview</a>
+            <a class="btn dark" href="/quotations/@Model.Input.Id/pdf">Download PDF</a>
+        }
+        <button class="btn" type="submit">Save</button>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+    <div class="card">
+        <h2>Quotation details</h2>
+        <div class="grid3">
+            <div class="field">
+                <label asp-for="Input.JobNo">Job No. <span class="req">*</span></label>
+                <input asp-for="Input.JobNo" />
+                <span asp-validation-for="Input.JobNo" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.QuoteDate">Date <span class="req">*</span></label>
+                <input asp-for="Input.QuoteDate" type="date" />
+                <span asp-validation-for="Input.QuoteDate" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.VatPercent">VAT % <span class="req">*</span></label>
+                <input asp-for="Input.VatPercent" type="number" step="0.01" min="0" max="100" id="vat-percent" />
+                <span asp-validation-for="Input.VatPercent" class="validation-message"></span>
+            </div>
+        </div>
+
+        <div class="grid2" style="margin-top:14px">
+            <div class="field">
+                <label asp-for="Input.SubjectEn">Subject — English <span class="req">*</span></label>
+                <input asp-for="Input.SubjectEn" />
+                <span asp-validation-for="Input.SubjectEn" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.SubjectAr">الموضوع — Arabic</label>
+                <input asp-for="Input.SubjectAr" dir="rtl" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Prepared for</h2>
+        <div class="grid2">
+            <div class="field">
+                <label asp-for="Input.CompanyEn">Company — English <span class="req">*</span></label>
+                <input asp-for="Input.CompanyEn" />
+                <span asp-validation-for="Input.CompanyEn" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.CompanyAr">اسم الشركة — Arabic</label>
+                <input asp-for="Input.CompanyAr" dir="rtl" />
+            </div>
+            <div class="field">
+                <label asp-for="Input.ContactPersonEn">Contact person — English <span class="req">*</span></label>
+                <input asp-for="Input.ContactPersonEn" />
+                <span asp-validation-for="Input.ContactPersonEn" class="validation-message"></span>
+            </div>
+            <div class="field">
+                <label asp-for="Input.ContactPersonAr">اسم الشخص المسؤول — Arabic</label>
+                <input asp-for="Input.ContactPersonAr" dir="rtl" />
+            </div>
+        </div>
+        <div class="field" style="margin-top:14px">
+            <label asp-for="Input.ContactDetails">Job title / phone</label>
+            <input asp-for="Input.ContactDetails" placeholder="Marketing Manager · +20 100 000 0000" />
+            <span class="hint">Printed as a small grey line under the contact name.</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Line items</h2>
+        <span asp-validation-for="Input.Items" class="validation-message"></span>
+
+        <table class="rows" id="items-table">
+            <thead>
+                <tr>
+                    <th style="width:34px"></th>
+                    <th>Description</th>
+                    <th style="width:110px">Quantity</th>
+                    <th style="width:150px">Unit price</th>
+                    <th class="num" style="width:130px">Total</th>
+                    <th style="width:44px"></th>
+                </tr>
+            </thead>
+            <tbody id="items-body">
+            @for (var i = 0; i < Model.Input.Items.Count; i++)
+            {
+                <tr class="item-row">
+                    <td class="idx"></td>
+                    <td>
+                        <div class="stack">
+                            <input asp-for="Input.Items[i].DescriptionEn" placeholder="Description (English)" />
+                            <input asp-for="Input.Items[i].DescriptionAr" dir="rtl" placeholder="البيان (عربي)" />
+                            <span asp-validation-for="Input.Items[i].DescriptionEn" class="validation-message"></span>
+                        </div>
+                    </td>
+                    <td><input asp-for="Input.Items[i].Quantity" class="qty" type="number" step="0.01" min="0" /></td>
+                    <td><input asp-for="Input.Items[i].UnitPrice" class="price" type="number" step="0.01" min="0" /></td>
+                    <td class="num line-total">0.00</td>
+                    <td><button type="button" class="btn sm danger remove-row" title="Remove">✕</button></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div style="margin-top:12px">
+            <button type="button" class="btn ghost" id="add-row">+ Add item</button>
+        </div>
+
+        <div class="totals-box">
+            <div class="row soft"><span>Total excl. VAT</span><span id="t-excl">0.00</span></div>
+            <div class="row soft"><span>VAT <span id="t-vat-pct">14</span>%</span><span id="t-vat">0.00</span></div>
+            <div class="row grand"><span>Total incl. VAT</span><span id="t-incl">EGP 0.00</span></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Terms &amp; conditions</h2>
+        <div class="field">
+            <label asp-for="Input.Terms">Terms <span class="req">*</span></label>
+            <textarea asp-for="Input.Terms" rows="7"></textarea>
+            <span class="hint">
+                One clause per line. Put the Arabic after a <strong>|</strong> to fill the right-hand column:
+                <code>Valid for 30 days. | صالح لمدة ٣٠ يوماً.</code>
+            </span>
+            <span asp-validation-for="Input.Terms" class="validation-message"></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Note <span style="color:var(--muted); font-weight:600; letter-spacing:0; text-transform:none">— optional</span></h2>
+        <div class="grid2">
+            <div class="field">
+                <label asp-for="Input.NoteEn">Note — English</label>
+                <textarea asp-for="Input.NoteEn" rows="3"></textarea>
+            </div>
+            <div class="field">
+                <label asp-for="Input.NoteAr">ملاحظة — Arabic</label>
+                <textarea asp-for="Input.NoteAr" dir="rtl" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Images <span style="color:var(--muted); font-weight:600; letter-spacing:0; text-transform:none">— optional, printed on page 2</span></h2>
+
+        @if (Model.Images.Count > 0)
+        {
+            <div class="thumbs">
+                @for (var i = 0; i < Model.Images.Count; i++)
+                {
+                    var image = Model.Images[i];
+                    <div class="thumb">
+                        <img src="@image.Path" alt="@image.Caption" />
+                        <div class="cap">
+                            <input type="hidden" name="ExistingImages[@i].Id" value="@image.Id" />
+                            <input type="text" name="ExistingImages[@i].Caption" value="@image.Caption" placeholder="Caption" />
+                            <label style="font-size:12px; display:flex; gap:6px; align-items:center; color:var(--red)">
+                                <input type="checkbox" name="ExistingImages[@i].Delete" value="true" style="width:auto" />
+                                Remove
+                            </label>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div style="height:16px"></div>
+        }
+
+        <div class="field">
+            <label asp-for="NewImages">Add images</label>
+            <input asp-for="NewImages" type="file" multiple accept="image/*" id="new-images" />
+            <span class="hint">JPG, PNG, WEBP or GIF · up to 8 MB each · three across on the printed page. Click any thumbnail to preview it full size.</span>
+            <span asp-validation-for="NewImages" class="validation-message"></span>
+        </div>
+
+        <!-- Previews for files picked but not yet saved — the only thumbnails a new quotation has. -->
+        <div class="thumbs" id="new-previews" style="margin-top:14px"></div>
+    </div>
+
+    <div class="page-head">
+        <a class="btn ghost" asp-page="/Index">Back to list</a>
+        <span class="spacer"></span>
+        <button class="btn" type="submit">Save quotation</button>
+    </div>
+</form>
+
+<div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
+    <img id="lb-img" src="" alt="" />
+    <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<template id="row-template">
+    <tr class="item-row">
+        <td class="idx"></td>
+        <td>
+            <div class="stack">
+                <input name="Input.Items[__i__].DescriptionEn" placeholder="Description (English)" type="text" />
+                <input name="Input.Items[__i__].DescriptionAr" dir="rtl" placeholder="البيان (عربي)" type="text" />
+            </div>
+        </td>
+        <td><input name="Input.Items[__i__].Quantity" class="qty" type="number" step="0.01" min="0" value="1" /></td>
+        <td><input name="Input.Items[__i__].UnitPrice" class="price" type="number" step="0.01" min="0" value="0" /></td>
+        <td class="num line-total">0.00</td>
+        <td><button type="button" class="btn sm danger remove-row" title="Remove">✕</button></td>
+    </tr>
+</template>
+
+@section Scripts {
+<script>
+(function () {
+    const body     = document.getElementById('items-body');
+    const template = document.getElementById('row-template');
+    const vatInput = document.getElementById('vat-percent');
+    const fmt      = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // Field names carry their row index, so every add/remove has to renumber them.
+    function reindex() {
+        body.querySelectorAll('tr.item-row').forEach((row, i) => {
+            row.querySelector('.idx').textContent = i + 1;
+            row.querySelectorAll('input').forEach(input => {
+                if (input.name) input.name = input.name.replace(/Input\.Items\[\d+\]/, `Input.Items[${i}]`);
+                input.removeAttribute('id');
+            });
+        });
+    }
+
+    function recalc() {
+        let subtotal = 0;
+        body.querySelectorAll('tr.item-row').forEach(row => {
+            const qty   = parseFloat(row.querySelector('.qty').value)   || 0;
+            const price = parseFloat(row.querySelector('.price').value) || 0;
+            const total = Math.round(qty * price * 100) / 100;
+            subtotal += total;
+            row.querySelector('.line-total').textContent = fmt.format(total);
+        });
+
+        const vatPct = parseFloat(vatInput.value) || 0;
+        const vat    = Math.round(subtotal * vatPct) / 100;
+
+        document.getElementById('t-excl').textContent    = fmt.format(subtotal);
+        document.getElementById('t-vat').textContent     = fmt.format(vat);
+        document.getElementById('t-vat-pct').textContent = vatPct;
+        document.getElementById('t-incl').textContent    = 'EGP ' + fmt.format(subtotal + vat);
+    }
+
+    document.getElementById('add-row').addEventListener('click', () => {
+        const count = body.querySelectorAll('tr.item-row').length;
+        const html  = template.innerHTML.replaceAll('__i__', count);
+        body.insertAdjacentHTML('beforeend', html);
+        reindex();
+        recalc();
+        body.lastElementChild.querySelector('input').focus();
+    });
+
+    body.addEventListener('click', e => {
+        if (!e.target.classList.contains('remove-row')) return;
+        e.target.closest('tr').remove();
+        if (body.querySelectorAll('tr.item-row').length === 0) {
+            document.getElementById('add-row').click();
+            return;
+        }
+        reindex();
+        recalc();
+    });
+
+    document.getElementById('quotation-form').addEventListener('input', recalc);
+
+    reindex();
+    recalc();
+
+    // ---- Image preview -------------------------------------------------
+    const lightbox = document.getElementById('lightbox');
+    const lbImg    = document.getElementById('lb-img');
+    const lbCap    = document.getElementById('lb-cap');
+
+    function openLightbox(src, caption) {
+        lbImg.src = src;
+        lbImg.alt = caption || '';
+        lbCap.textContent = caption || '';
+        lightbox.hidden = false;
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.hidden = true;
+        lbImg.src = '';
+        document.body.style.overflow = '';
+    }
+
+    lightbox.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
+    });
+
+    // Saved thumbnails: caption comes from the text box next to the image, so the
+    // preview shows whatever the user has typed rather than the stale saved value.
+    document.querySelectorAll('.thumb img').forEach(img => {
+        img.addEventListener('click', () => {
+            const box = img.closest('.thumb').querySelector('input[type="text"]');
+            openLightbox(img.src, box ? box.value : img.alt);
+        });
+    });
+
+    // Files chosen but not yet uploaded — rendered from object URLs.
+    const fileInput  = document.getElementById('new-images');
+    const previewBox = document.getElementById('new-previews');
+    let objectUrls   = [];
+
+    fileInput.addEventListener('change', () => {
+        objectUrls.forEach(URL.revokeObjectURL);
+        objectUrls = [];
+        previewBox.textContent = '';
+
+        for (const file of fileInput.files) {
+            if (!file.type.startsWith('image/')) continue;
+
+            const url = URL.createObjectURL(file);
+            objectUrls.push(url);
+
+            const cell = document.createElement('div');
+            cell.className = 'thumb';
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = file.name;
+            img.addEventListener('click', () => openLightbox(url, file.name));
+
+            const cap = document.createElement('div');
+            cap.className = 'cap';
+            cap.style.fontSize = '12px';
+            cap.style.color = 'var(--muted)';
+            cap.textContent = file.name;
+
+            cell.append(img, cap);
+            previewBox.appendChild(cell);
+        }
+    });
+})();
+</script>
+}

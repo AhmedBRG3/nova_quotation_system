@@ -1,0 +1,478 @@
+<title>NOVA — Quotation Layout v2</title>
+<style>
+  /* ============================================================
+     NOVA Marketing & Advertising Agency — Quotation Template v2
+     A4 print sheet · EGP · 14% VAT · bilingual EN/AR
+
+     Fields (* = required):
+       job_no*      subject*        quote_date*
+       company*     contact_person*
+       items*       (description, quantity, unit_price, total)
+       totals*      (excl. VAT / VAT / incl. VAT)
+       terms*       note            images
+     ============================================================ */
+
+  :root{
+    --red:      #C4202D;
+    --red-dark: #9A1922;
+    --ink:      #14161A;
+    --body:     #333840;
+    --muted:    #7A828C;
+    --line:     #E3E5E9;
+    --soft:     #F6F7F9;
+    --paper:    #FFFFFF;
+    --backdrop: #E8EAEE;
+
+    --lat: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --ar:  "Cairo", "Geeza Pro", "Al Bayan", "Segoe UI", Tahoma, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--backdrop);
+    color:var(--body);
+    font-family:var(--lat);
+    font-size:10.5px;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .ar{ font-family:var(--ar); direction:rtl; unicode-bidi:isolate; }
+
+  /* ---------- Screen chrome (never printed) ---------- */
+  .toolbar{
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:12px 18px; background:var(--ink); color:#fff;
+  }
+  .toolbar h1{ font-size:13px; font-weight:600; margin:0; letter-spacing:.02em; }
+  .toolbar span{ color:#A8B0BA; font-size:11px; }
+  .toolbar button{
+    margin-inline-start:auto;
+    background:var(--red); color:#fff; border:0;
+    padding:8px 16px; border-radius:4px;
+    font:inherit; font-weight:600; cursor:pointer;
+  }
+  .toolbar button:hover{ background:var(--red-dark); }
+
+  /* ---------- A4 sheet ---------- */
+  .sheet{
+    width:210mm; min-height:297mm;
+    margin:24px auto;
+    padding:11mm 12mm 9mm;
+    background:var(--paper);
+    box-shadow:0 2px 18px rgba(0,0,0,.14);
+    display:flex; flex-direction:column;
+  }
+  .sheet + .sheet{ margin-top:24px; }
+
+  /* ---------- Masthead ---------- */
+  .masthead{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; }
+
+  /* Wordmark stand-in — replace with <img class="logo-img" src="../assets/logo.png" alt="NOVA"> */
+  .logo{ line-height:1; }
+  .logo .word{ font-size:38px; font-weight:800; letter-spacing:-.02em; color:var(--red); }
+  .logo .tag{
+    margin-top:5px; font-size:8.5px; font-weight:700; letter-spacing:.18em;
+    color:var(--ink); text-transform:uppercase;
+  }
+  .logo-img{ width:50mm; height:auto; display:block; }
+
+  .doc-title{ text-align:right; }
+  .doc-title .en{
+    font-size:22px; font-weight:800; letter-spacing:.06em;
+    color:var(--ink); text-transform:uppercase;
+  }
+  .doc-title .ar{ font-size:13px; font-weight:700; color:var(--red); margin-top:1px; }
+
+  .meta{ margin-top:7px; border-collapse:collapse; margin-inline-start:auto; }
+  .meta td{ padding:2px 0; font-size:10px; white-space:nowrap; }
+  .meta .k{ color:var(--muted); text-align:right; padding-inline-end:10px; }
+  .meta .v{ color:var(--ink); font-weight:700; text-align:right; }
+  .meta .job .v{ color:var(--red); font-size:11.5px; }
+
+  .rule{ height:3px; background:var(--red); margin-top:8px; }
+  .rule.thin{ height:1px; background:var(--line); }
+
+  /* ---------- Shared section label ---------- */
+  .block-label{
+    font-size:8.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--red); margin-bottom:4px;
+  }
+  .block-label .ar{ color:var(--muted); font-weight:600; letter-spacing:0; }
+
+  /* ---------- Subject ---------- */
+  .subject{
+    margin-top:6mm; padding:7px 10px;
+    background:var(--soft); border-inline-start:3px solid var(--red);
+  }
+  .subject .block-label{ margin-bottom:2px; }
+  .subject .v{ font-size:13px; font-weight:700; color:var(--ink); }
+  .subject .v-ar{ font-size:12px; font-weight:600; color:var(--body); margin-top:1px; }
+
+  /* ---------- Prepared for ---------- */
+  .prepared{ display:grid; grid-template-columns:1fr 1fr; gap:8mm; margin-top:6mm; }
+  .prepared .v{ font-size:12.5px; font-weight:700; color:var(--ink); }
+  .prepared .v-ar{ font-size:11.5px; font-weight:600; color:var(--body); margin-top:1px; }
+  .prepared .sub{ color:var(--muted); margin-top:2px; }
+
+  /* ---------- Line items ---------- */
+  .items{ width:100%; border-collapse:collapse; margin-top:6mm; }
+  .items thead th{
+    background:var(--red); color:#fff;
+    font-size:8.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+    padding:7px 9px; text-align:left; vertical-align:middle;
+  }
+  .items thead th .ar{
+    display:block; font-size:9px; font-weight:600;
+    letter-spacing:0; text-transform:none; opacity:.9; margin-top:1px;
+  }
+  .items th.num, .items td.num{ text-align:right; }
+  .items th.mid, .items td.mid{ text-align:center; }
+
+  .items tbody td{
+    padding:6px 9px; border-bottom:1px solid var(--line);
+    vertical-align:top; font-size:10.5px;
+  }
+  .items tbody tr:nth-child(even) td{ background:var(--soft); }
+  .items tbody td.idx{ color:var(--muted); text-align:center; }
+  .items .desc-en{ font-weight:600; color:var(--ink); }
+  .items .desc-ar{ font-size:10px; color:var(--muted); }
+  .items td.num{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .items td.total{ font-weight:700; color:var(--ink); }
+
+  /* ---------- Totals ---------- */
+  .totals-wrap{ display:flex; justify-content:flex-end; margin-top:5mm; }
+  .totals{ border-collapse:collapse; width:88mm; }
+  .totals td{ padding:5px 10px; font-size:10.5px; }
+  .totals .k{ color:var(--body); }
+  .totals .k .ar{ color:var(--muted); font-size:9.5px; }
+  .totals .v{
+    text-align:right; font-weight:700; color:var(--ink);
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .totals tr.sub td{ background:var(--soft); }
+  .totals tr.vat td{ background:var(--soft); border-top:1px solid var(--line); }
+  .totals tr.grand td{
+    background:var(--red); color:#fff;
+    font-size:12.5px; font-weight:800; padding:8px 10px;
+  }
+  .totals tr.grand .k .ar{ color:rgba(255,255,255,.85); font-size:10px; }
+  .totals tr.grand .v{ color:#fff; }
+
+  /* ---------- Terms ---------- */
+  .terms{ margin-top:6mm; }
+  .terms-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3px 8mm; margin-top:3px; }
+  .terms-grid div{ font-size:9.5px; color:var(--body); }
+  .terms-grid .ar{ color:var(--muted); }
+
+  /* ---------- Note ---------- */
+  .note{
+    margin-top:5mm; padding:7px 10px;
+    background:var(--soft); border:1px dashed var(--line);
+    border-inline-start:3px solid var(--ink);
+  }
+  .note .block-label{ color:var(--ink); }
+  .note p{ margin:0; font-size:10px; }
+  .note p.ar{ color:var(--muted); margin-top:2px; }
+
+  /* ---------- Images ---------- */
+  .images{ margin-top:6mm; }
+  .img-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5mm; margin-top:4px; }
+  .figure{ break-inside:avoid; }
+  .figure img{ width:100%; height:auto; display:block; border:1px solid var(--line); }
+  /* Placeholder shown until a real image is attached */
+  .figure .ph{
+    aspect-ratio:4/3; border:1px dashed #C7CCD3; background:var(--soft);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+  }
+  .figure figcaption{ margin-top:3px; font-size:9px; color:var(--muted); }
+  .figure figcaption b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- Signatures ---------- */
+  .signatures{ display:grid; grid-template-columns:1fr 1fr; gap:14mm; margin-top:auto; padding-top:9mm; }
+  .sig .line{ border-top:1px solid var(--ink); padding-top:5px; }
+  .sig .role{ font-size:10px; font-weight:700; color:var(--ink); }
+  .sig .role .ar{ font-weight:600; color:var(--muted); }
+  .sig .hint{ font-size:9px; color:var(--muted); margin-top:2px; }
+
+  /* ---------- Footer ---------- */
+  .footer{
+    margin-top:5mm; padding-top:5px; border-top:2px solid var(--red);
+    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    font-size:9px; color:var(--muted);
+  }
+  .footer strong{ color:var(--ink); font-weight:700; }
+
+  /* ---------- Continuation-page header ---------- */
+  .cont-head{
+    display:flex; justify-content:space-between; align-items:baseline;
+    padding-bottom:5px; border-bottom:3px solid var(--red);
+  }
+  .cont-head .who{ font-size:12px; font-weight:800; color:var(--red); letter-spacing:.02em; }
+  .cont-head .what{ font-size:9.5px; color:var(--muted); }
+
+  /* ---------- Print ---------- */
+  @page{ size:A4; margin:0; }
+  @media print{
+    body{ background:var(--paper); }
+    .toolbar{ display:none; }
+    .sheet{ margin:0; box-shadow:none; width:auto; min-height:auto; }
+    .sheet + .sheet{ margin-top:0; break-before:page; }
+    .items thead{ display:table-header-group; }
+    .items tbody tr{ break-inside:avoid; }
+    .totals-wrap, .terms, .note, .signatures, .footer{ break-inside:avoid; }
+  }
+
+  /* ---------- Small screens (review only) ---------- */
+  @media screen and (max-width:820px){
+    .sheet{ width:auto; margin:12px; padding:16px; }
+    .prepared, .terms-grid, .signatures{ grid-template-columns:1fr; gap:14px; }
+    .img-grid{ grid-template-columns:repeat(2, 1fr); }
+    .totals{ width:100%; }
+  }
+</style>
+
+<div class="toolbar">
+  <h1>Quotation layout — draft v2</h1>
+  <span>A4 · EGP · 14% VAT · EN/AR</span>
+  <button onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+
+<!-- ==================== PAGE 1 ==================== -->
+<div class="sheet">
+
+  <!-- Masthead: logo + job no. + date -->
+  <div class="masthead">
+    <div class="logo">
+      <!-- Replace with: <img class="logo-img" src="../assets/logo.png" alt="NOVA"> -->
+      <div class="word">NOVA</div>
+      <div class="tag">Marketing &amp; Advertising Agency</div>
+
+      <div style="margin-top:18px; display:flex; justify-content:flex-end;">
+        <table class="meta">
+          <tr>
+            <td class="k">TAX number.</td>
+            <td class="v" style="color:var(--red); font-weight:700;">NV-2026-0148</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    
+    
+
+    <div class="doc-title">
+      <div class="en">Quotation</div>
+      <div class="ar">عرض سعر</div>
+      <table class="meta">
+        <tr class="job"><td class="k">Job No. / رقم المهمة</td><td class="v">NV-2026-0148</td></tr>
+        <tr><td class="k">Date / التاريخ</td><td class="v">17 Aug 2026</td></tr>
+        <tr><td class="k">Currency / العملة</td><td class="v">EGP — جنيه مصري</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- Subject -->
+  <div class="subject">
+    <div class="block-label">Subject <span class="ar">/ الموضوع</span></div>
+    <div class="v">Q4 Brand Campaign — Social Media, Content &amp; Paid Advertising</div>
+    <div class="v-ar ar">حملة الربع الرابع — إدارة السوشيال ميديا وإنتاج المحتوى والإعلانات المدفوعة</div>
+  </div>
+
+  <!-- Prepared for -->
+  <div class="prepared">
+    <div>
+      <div class="block-label">Prepared For <span class="ar">/ مقدم إلى</span></div>
+      <div class="v">Sample Client Co.</div>
+      <div class="v-ar ar">شركة العميل النموذجية</div>
+    </div>
+    <div>
+      <div class="block-label">Contact Person <span class="ar">/ الشخص المسؤول</span></div>
+      <div class="v">Sample Contact</div>
+      <div class="v-ar ar">اسم الشخص المسؤول</div>
+      <div class="sub">Marketing Manager · +20 100 000 0000</div>
+    </div>
+  </div>
+
+  <!-- Line items -->
+  <table class="items">
+    <thead>
+      <tr>
+        <th class="mid" style="width:9mm">#</th>
+        <th>Description <span class="ar">البيان</span></th>
+        <th class="mid" style="width:20mm">Qty <span class="ar">الكمية</span></th>
+        <th class="num" style="width:30mm">Unit Price <span class="ar">سعر الوحدة</span></th>
+        <th class="num" style="width:32mm">Total <span class="ar">الإجمالي</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="idx">1</td>
+        <td>
+          <div class="desc-en">Social Media Management — 3 platforms, 16 posts/month</div>
+          <div class="desc-ar ar">إدارة منصات التواصل الاجتماعي — ٣ منصات، ١٦ منشوراً شهرياً</div>
+        </td>
+        <td class="mid">3</td>
+        <td class="num">25,000.00</td>
+        <td class="num total">75,000.00</td>
+      </tr>
+      <tr>
+        <td class="idx">2</td>
+        <td>
+          <div class="desc-en">Content Production — full-day photo shoot, 30 retouched shots</div>
+          <div class="desc-ar ar">إنتاج المحتوى — تصوير فوتوغرافي ليوم كامل، ٣٠ صورة معالجة</div>
+        </td>
+        <td class="mid">2</td>
+        <td class="num">18,500.00</td>
+        <td class="num total">37,000.00</td>
+      </tr>
+      <tr>
+        <td class="idx">3</td>
+        <td>
+          <div class="desc-en">Video Production — 60s brand film, concept to final cut</div>
+          <div class="desc-ar ar">إنتاج فيديو — فيلم تعريفي ٦٠ ثانية من الفكرة حتى المونتاج النهائي</div>
+        </td>
+        <td class="mid">1</td>
+        <td class="num">95,000.00</td>
+        <td class="num total">95,000.00</td>
+      </tr>
+      <tr>
+        <td class="idx">4</td>
+        <td>
+          <div class="desc-en">Paid Ads Management (Meta &amp; Google) — management fee only</div>
+          <div class="desc-ar ar">إدارة الحملات الإعلانية المدفوعة (ميتا وجوجل) — رسوم الإدارة فقط</div>
+        </td>
+        <td class="mid">3</td>
+        <td class="num">15,000.00</td>
+        <td class="num total">45,000.00</td>
+      </tr>
+      <tr>
+        <td class="idx">5</td>
+        <td>
+          <div class="desc-en">Brand Identity Refresh — logo lockups, colour system, guidelines</div>
+          <div class="desc-ar ar">تحديث الهوية البصرية — أشكال الشعار ونظام الألوان ودليل الهوية</div>
+        </td>
+        <td class="mid">1</td>
+        <td class="num">42,000.00</td>
+        <td class="num total">42,000.00</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Totals: without VAT / VAT / with VAT -->
+  <div class="totals-wrap">
+    <table class="totals">
+      <tr class="sub">
+        <td class="k">Total excl. VAT <span class="ar">الإجمالي قبل الضريبة</span></td>
+        <td class="v">294,000.00</td>
+      </tr>
+      <tr class="vat">
+        <td class="k">VAT 14% <span class="ar">ضريبة القيمة المضافة ١٤٪</span></td>
+        <td class="v">41,160.00</td>
+      </tr>
+      <tr class="grand">
+        <td class="k">Total incl. VAT <span class="ar">الإجمالي شامل الضريبة</span></td>
+        <td class="v">EGP 335,160.00</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Terms & Conditions -->
+  <div class="terms">
+    <div class="block-label">Terms &amp; Conditions <span class="ar">/ الشروط والأحكام</span></div>
+    <div class="rule thin"></div>
+    <div class="terms-grid">
+      <div>1. This quotation is valid for 30 days from the date above.</div>
+      <div class="ar">١. هذا العرض صالح لمدة ٣٠ يوماً من التاريخ المذكور أعلاه.</div>
+      <div>2. Payment: 50% advance on approval, 50% on final delivery.</div>
+      <div class="ar">٢. الدفع: ٥٠٪ مقدماً عند الموافقة، و٥٠٪ عند التسليم النهائي.</div>
+      <div>3. Work starts after signed approval and receipt of the advance payment.</div>
+      <div class="ar">٣. يبدأ العمل بعد التوقيع على العرض وسداد الدفعة المقدمة.</div>
+      <div>4. Two rounds of revisions are included per deliverable; extra rounds are billable.</div>
+      <div class="ar">٤. يشمل العرض جولتي تعديلات لكل مُخرج، وأي تعديلات إضافية تُحتسب منفصلة.</div>
+      <div>5. Any change of scope requires a written addendum to this quotation.</div>
+      <div class="ar">٥. أي تغيير في نطاق العمل يتطلب ملحقاً كتابياً لهذا العرض.</div>
+    </div>
+  </div>
+
+  <!-- Note (optional) -->
+  <div class="note">
+    <div class="block-label">Note <span class="ar">/ ملاحظة</span></div>
+    <p>Media budget for paid advertising is billed separately and is not included in the amounts above.</p>
+    <p class="ar">ميزانية الإعلانات المدفوعة تُحتسب بشكل منفصل وغير مشمولة في المبالغ أعلاه.</p>
+  </div>
+
+  <!-- Signatures -->
+  <div class="signatures">
+    <div class="sig">
+      <div class="line">
+        <div class="role">For NOVA <span class="ar">عن نوفا</span></div>
+        <div class="hint">Name · Signature · Stamp · Date</div>
+      </div>
+    </div>
+    <div class="sig">
+      <div class="line">
+        <div class="role">Client Approval <span class="ar">موافقة العميل</span></div>
+        <div class="hint">Name · Signature · Stamp · Date</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div><strong>NOVA Marketing &amp; Advertising Agency</strong> · Address line, City, Egypt</div>
+    <div>+20 000 000 0000 · info@nova.agency · www.nova.agency · Page 1 of 2</div>
+  </div>
+
+</div>
+
+
+<!-- ==================== PAGE 2 — Images (optional) ==================== -->
+<div class="sheet">
+
+  <div class="cont-head">
+    <div class="who">NOVA</div>
+    <div class="what">Quotation NV-2026-0148 · Sample Client Co. · 17 Aug 2026</div>
+  </div>
+
+  <div class="images">
+    <div class="block-label">Images &amp; References <span class="ar">/ الصور والمرفقات</span></div>
+    <div class="img-grid">
+      <figure class="figure">
+        <div class="ph">Image 1</div>
+        <figcaption><b>Reference 01</b> — Social media key visual direction</figcaption>
+      </figure>
+      <figure class="figure">
+        <div class="ph">Image 2</div>
+        <figcaption><b>Reference 02</b> — Photography mood board</figcaption>
+      </figure>
+      <figure class="figure">
+        <div class="ph">Image 3</div>
+        <figcaption><b>Reference 03</b> — Video storyboard frame</figcaption>
+      </figure>
+      <figure class="figure">
+        <div class="ph">Image 4</div>
+        <figcaption><b>Reference 04</b> — Brand identity refresh sample</figcaption>
+      </figure>
+      <figure class="figure">
+        <div class="ph">Image 5</div>
+        <figcaption><b>Reference 05</b> — Paid ads creative format</figcaption>
+      </figure>
+      <figure class="figure">
+        <div class="ph">Image 6</div>
+        <figcaption><b>Reference 06</b> — Print collateral mock-up</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div><strong>NOVA Marketing &amp; Advertising Agency</strong> · Address line, City, Egypt</div>
+    <div>+20 000 000 0000 · info@nova.agency · www.nova.agency · Page 2 of 2</div>
+  </div>
+
+</div>

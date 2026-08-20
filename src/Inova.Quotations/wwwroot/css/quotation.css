@@ -1,0 +1,217 @@
+/* ============================================================
+   NOVA quotation — A4 print sheet
+   Used by both the on-screen preview and the Chrome PDF export,
+   so what you see is exactly what downloads.
+   ============================================================ */
+
+:root{
+  --red:      #C4202D;
+  --red-dark: #9A1922;
+  --ink:      #14161A;
+  --body:     #333840;
+  --muted:    #7A828C;
+  --line:     #E3E5E9;
+  --soft:     #F6F7F9;
+  --paper:    #FFFFFF;
+  --backdrop: #E8EAEE;
+
+  --lat: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ar:  "Cairo", "Geeza Pro", "Al Bayan", "Segoe UI", Tahoma, sans-serif;
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0;
+  background:var(--backdrop);
+  color:var(--body);
+  font-family:var(--lat);
+  font-size:10.5px;
+  line-height:1.4;
+  -webkit-font-smoothing:antialiased;
+}
+
+.ar{ font-family:var(--ar); direction:rtl; unicode-bidi:isolate; }
+
+/* ---------- Screen chrome (never printed) ---------- */
+.toolbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:12px 18px; background:var(--ink); color:#fff;
+  font-size:12px;
+}
+.toolbar h1{ font-size:13px; font-weight:600; margin:0; letter-spacing:.02em; }
+.toolbar .meta-note{ color:#A8B0BA; font-size:11px; }
+.toolbar .spacer{ margin-inline-start:auto; }
+.toolbar a, .toolbar button{
+  background:var(--red); color:#fff; border:0;
+  padding:8px 16px; border-radius:4px; text-decoration:none;
+  font:inherit; font-weight:600; cursor:pointer; display:inline-block;
+}
+.toolbar a.ghost{ background:transparent; border:1px solid #4A5058; }
+.toolbar a:hover, .toolbar button:hover{ background:var(--red-dark); }
+.toolbar a.ghost:hover{ background:#2A2F36; }
+
+/* ---------- A4 sheet ---------- */
+.sheet{
+  width:210mm; min-height:297mm;
+  margin:24px auto;
+  padding:11mm 12mm 9mm;
+  background:var(--paper);
+  box-shadow:0 2px 18px rgba(0,0,0,.14);
+  display:flex; flex-direction:column;
+}
+
+/* ---------- Masthead ---------- */
+.masthead{ display:flex; justify-content:space-between; align-items:flex-start; gap:20px; }
+
+.logo{ line-height:1; }
+.logo .word{ font-size:38px; font-weight:800; letter-spacing:-.02em; color:var(--red); }
+.logo .tag{
+  margin-top:5px; font-size:8.5px; font-weight:700; letter-spacing:.18em;
+  color:var(--ink); text-transform:uppercase;
+}
+.logo-img{ width:50mm; height:auto; display:block; }
+
+.doc-title{ text-align:right; }
+.doc-title .en{
+  font-size:22px; font-weight:800; letter-spacing:.06em;
+  color:var(--ink); text-transform:uppercase;
+}
+.doc-title .ar{ font-size:13px; font-weight:700; color:var(--red); margin-top:1px; }
+
+.meta{ margin-top:7px; border-collapse:collapse; margin-inline-start:auto; }
+.meta td{ padding:2px 0; font-size:10px; white-space:nowrap; }
+.meta .k{ color:var(--muted); text-align:right; padding-inline-end:10px; }
+.meta .v{ color:var(--ink); font-weight:700; text-align:right; }
+.meta .job .v{ color:var(--red); font-size:11.5px; }
+
+.rule{ height:3px; background:var(--red); margin-top:8px; }
+.rule.thin{ height:1px; background:var(--line); }
+
+/* ---------- Shared section label ---------- */
+.block-label{
+  font-size:8.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--red); margin-bottom:4px;
+}
+.block-label .ar{ color:var(--muted); font-weight:600; letter-spacing:0; }
+
+/* ---------- Subject ---------- */
+.subject{
+  margin-top:6mm; padding:7px 10px;
+  background:var(--soft); border-inline-start:3px solid var(--red);
+}
+.subject .block-label{ margin-bottom:2px; }
+.subject .v{ font-size:13px; font-weight:700; color:var(--ink); }
+.subject .v-ar{ font-size:12px; font-weight:600; color:var(--body); margin-top:1px; }
+
+/* ---------- Prepared for ---------- */
+.prepared{ display:grid; grid-template-columns:1fr 1fr; gap:8mm; margin-top:6mm; }
+.prepared .v{ font-size:12.5px; font-weight:700; color:var(--ink); }
+.prepared .v-ar{ font-size:11.5px; font-weight:600; color:var(--body); margin-top:1px; }
+.prepared .sub{ color:var(--muted); margin-top:2px; }
+
+/* ---------- Line items ---------- */
+.items{ width:100%; border-collapse:collapse; margin-top:6mm; }
+.items thead th{
+  background:var(--red); color:#fff;
+  font-size:8.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  padding:7px 9px; text-align:left; vertical-align:middle;
+}
+.items thead th .ar{
+  display:block; font-size:9px; font-weight:600;
+  letter-spacing:0; text-transform:none; opacity:.9; margin-top:1px;
+}
+.items th.num, .items td.num{ text-align:right; }
+.items th.mid, .items td.mid{ text-align:center; }
+
+.items tbody td{
+  padding:6px 9px; border-bottom:1px solid var(--line);
+  vertical-align:top; font-size:10.5px;
+}
+.items tbody tr:nth-child(even) td{ background:var(--soft); }
+.items tbody td.idx{ color:var(--muted); text-align:center; }
+.items .desc-en{ font-weight:600; color:var(--ink); }
+.items .desc-ar{ font-size:10px; color:var(--muted); }
+.items td.num{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+.items td.total{ font-weight:700; color:var(--ink); }
+
+/* ---------- Totals ---------- */
+.totals-wrap{ display:flex; justify-content:flex-end; margin-top:5mm; }
+.totals{ border-collapse:collapse; width:88mm; }
+.totals td{ padding:5px 10px; font-size:10.5px; }
+.totals .k{ color:var(--body); }
+.totals .k .ar{ color:var(--muted); font-size:9.5px; }
+.totals .v{
+  text-align:right; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.totals tr.sub td{ background:var(--soft); }
+.totals tr.vat td{ background:var(--soft); border-top:1px solid var(--line); }
+.totals tr.grand td{
+  background:var(--red); color:#fff;
+  font-size:12.5px; font-weight:800; padding:8px 10px;
+}
+.totals tr.grand .k .ar{ color:rgba(255,255,255,.85); font-size:10px; }
+.totals tr.grand .v{ color:#fff; }
+
+/* ---------- Terms ---------- */
+.terms{ margin-top:6mm; }
+.terms-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3px 8mm; margin-top:3px; }
+.terms-grid div{ font-size:9.5px; color:var(--body); }
+.terms-grid .ar{ color:var(--muted); }
+
+/* ---------- Note ---------- */
+.note{
+  margin-top:5mm; padding:7px 10px;
+  background:var(--soft); border:1px dashed var(--line);
+  border-inline-start:3px solid var(--ink);
+}
+.note .block-label{ color:var(--ink); }
+.note p{ margin:0; font-size:10px; }
+.note p.ar{ color:var(--muted); margin-top:2px; }
+
+/* ---------- Images ---------- */
+.images{ margin-top:6mm; }
+.img-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5mm; margin-top:4px; }
+.figure{ break-inside:avoid; }
+.figure img{
+  width:100%; aspect-ratio:4/3; object-fit:cover;
+  display:block; border:1px solid var(--line);
+}
+.figure figcaption{ margin-top:3px; font-size:9px; color:var(--muted); }
+
+/* ---------- Signatures ---------- */
+.signatures{ display:grid; grid-template-columns:1fr 1fr; gap:14mm; margin-top:auto; padding-top:9mm; }
+.sig .line{ border-top:1px solid var(--ink); padding-top:5px; }
+.sig .role{ font-size:10px; font-weight:700; color:var(--ink); }
+.sig .role .ar{ font-weight:600; color:var(--muted); }
+.sig .hint{ font-size:9px; color:var(--muted); margin-top:2px; }
+
+/* ---------- Footer ---------- */
+.footer{
+  margin-top:5mm; padding-top:5px; border-top:2px solid var(--red);
+  display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  font-size:9px; color:var(--muted);
+}
+.footer strong{ color:var(--ink); font-weight:700; }
+
+/* ---------- Continuation-page header ---------- */
+.cont-head{
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding-bottom:5px; border-bottom:3px solid var(--red);
+}
+.cont-head .who{ font-size:12px; font-weight:800; color:var(--red); letter-spacing:.02em; }
+.cont-head .what{ font-size:9.5px; color:var(--muted); }
+
+/* ---------- Print ---------- */
+@page{ size:A4; margin:0; }
+@media print{
+  body{ background:var(--paper); }
+  .toolbar{ display:none; }
+  .sheet{ margin:0; box-shadow:none; width:auto; min-height:297mm; }
+  .sheet + .sheet{ break-before:page; }
+  .items thead{ display:table-header-group; }
+  .items tbody tr{ break-inside:avoid; }
+  .totals-wrap, .terms, .note, .signatures, .footer{ break-inside:avoid; }
+}

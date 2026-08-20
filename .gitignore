@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+
+# Uploaded logos and quotation images
+src/Inova.Quotations/wwwroot/uploads/
+
+# Local secrets (connection strings with real passwords)
+appsettings.Local.json
+
+# Real connection string lives here — never commit it
+src/Inova.Quotations/appsettings.Development.json
+.DS_Store

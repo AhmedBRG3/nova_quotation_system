@@ -1,0 +1,73 @@
+@page
+@model Inova.Quotations.Pages.IndexModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Quotations";
+    var inv = CultureInfo.InvariantCulture;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash">@Model.Flash</div>
+}
+
+<div class="page-head">
+    <h1>Quotations</h1>
+    <span class="spacer"></span>
+    <form method="get" style="display:flex; gap:8px;">
+        <input type="text" name="q" value="@Model.Q" placeholder="Search job no., subject or company" style="width:280px" />
+        <button class="btn ghost" type="submit">Search</button>
+    </form>
+</div>
+
+@if (Model.Quotations.Count == 0)
+{
+    <div class="card empty">
+        <p>@(string.IsNullOrWhiteSpace(Model.Q) ? "No quotations yet." : "Nothing matched that search.")</p>
+        <a class="btn" asp-page="/Quotations/Edit">Create the first quotation</a>
+    </div>
+}
+else
+{
+    <table class="list">
+        <thead>
+            <tr>
+                <th style="width:130px">Job No.</th>
+                <th>Subject</th>
+                <th style="width:210px">Prepared for</th>
+                <th style="width:110px">Date</th>
+                <th class="num" style="width:140px">Total incl. VAT</th>
+                <th style="width:230px"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var q in Model.Quotations)
+        {
+            <tr>
+                <td class="job">@q.JobNo</td>
+                <td>
+                    <div class="subject">@q.SubjectEn</div>
+                    <div class="sub">@q.Items.Count item@(q.Items.Count == 1 ? "" : "s")</div>
+                </td>
+                <td>
+                    <div>@q.CompanyEn</div>
+                    <div class="sub">@q.ContactPersonEn</div>
+                </td>
+                <td>@q.QuoteDate.ToString("dd MMM yyyy", inv)</td>
+                <td class="num money">@q.TotalInclVat.ToString("N2", inv)</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn sm ghost" asp-page="/Quotations/Edit" asp-route-id="@q.Id">Edit</a>
+                        <a class="btn sm ghost" asp-page="/Quotations/Print" asp-route-id="@q.Id" target="_blank">Preview</a>
+                        <a class="btn sm dark" href="/quotations/@q.Id/pdf">PDF</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@q.Id"
+                              onsubmit="return confirm('Delete quotation @q.JobNo? This cannot be undone.');">
+                            <button class="btn sm danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

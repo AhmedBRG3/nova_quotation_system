@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — NOVA Quotations</title>
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">NOVA<small>Marketing &amp; Advertising</small></div>
+        <nav>
+            <a asp-page="/Index">Quotations</a>
+            <a asp-page="/Settings">Settings</a>
+        </nav>
+        <span class="spacer"></span>
+        <a class="btn sm" asp-page="/Quotations/Edit">+ New quotation</a>
+    </header>
+
+    <main class="wrap">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

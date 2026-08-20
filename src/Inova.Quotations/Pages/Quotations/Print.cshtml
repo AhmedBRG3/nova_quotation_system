@@ -1,0 +1,233 @@
+@page "/Quotations/Print/{id:int}"
+@model Inova.Quotations.Pages.Quotations.PrintModel
+@using System.Globalization
+@{
+    Layout = null;
+    var q = Model.Quotation;
+    var co = Model.Company;
+    var inv = CultureInfo.InvariantCulture;
+    var pages = q.Images.Count > 0 ? 2 : 1;
+    string Money(decimal d) => d.ToString("N2", inv);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@q.JobNo — @q.CompanyEn</title>
+    <link rel="stylesheet" href="~/css/quotation.css" asp-append-version="true" />
+</head>
+<body>
+
+@if (!Model.Bare)
+{
+    <div class="toolbar">
+        <h1>@q.JobNo</h1>
+        <span class="meta-note">@q.CompanyEn · @q.QuoteDate.ToString("dd MMM yyyy", inv) · EGP · @q.VatPercent.ToString("0.##", inv)% VAT</span>
+        <span class="spacer"></span>
+        <a class="ghost" asp-page="/Quotations/Edit" asp-route-id="@q.Id">Edit</a>
+        <a href="/quotations/@q.Id/pdf">Download PDF</a>
+    </div>
+}
+
+<!-- ==================== PAGE 1 ==================== -->
+<div class="sheet">
+
+    <div class="masthead">
+        <div class="logo">
+            @if (!string.IsNullOrWhiteSpace(co.LogoPath))
+            {
+                <img class="logo-img" src="@co.LogoPath" alt="@co.Name" />
+            }
+            else
+            {
+                <div class="word">NOVA</div>
+                <div class="tag">Marketing &amp; Advertising Agency</div>
+            }
+        </div>
+
+        <div class="doc-title">
+            <div class="en">Quotation</div>
+            <div class="ar">عرض سعر</div>
+            <table class="meta">
+                <tr class="job"><td class="k">Job No. / رقم المهمة</td><td class="v">@q.JobNo</td></tr>
+                <tr><td class="k">Date / التاريخ</td><td class="v">@q.QuoteDate.ToString("dd MMM yyyy", inv)</td></tr>
+                <tr><td class="k">Currency / العملة</td><td class="v">EGP — جنيه مصري</td></tr>
+                @if (!string.IsNullOrWhiteSpace(co.TaxNumber))
+                {
+                    <tr><td class="k">Tax No. / الرقم الضريبي</td><td class="v">@co.TaxNumber</td></tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="subject">
+        <div class="block-label">Subject <span class="ar">/ الموضوع</span></div>
+        <div class="v">@q.SubjectEn</div>
+        @if (!string.IsNullOrWhiteSpace(q.SubjectAr))
+        {
+            <div class="v-ar ar">@q.SubjectAr</div>
+        }
+    </div>
+
+    <div class="prepared">
+        <div>
+            <div class="block-label">Prepared For <span class="ar">/ مقدم إلى</span></div>
+            <div class="v">@q.CompanyEn</div>
+            @if (!string.IsNullOrWhiteSpace(q.CompanyAr))
+            {
+                <div class="v-ar ar">@q.CompanyAr</div>
+            }
+        </div>
+        <div>
+            <div class="block-label">Contact Person <span class="ar">/ الشخص المسؤول</span></div>
+            <div class="v">@q.ContactPersonEn</div>
+            @if (!string.IsNullOrWhiteSpace(q.ContactPersonAr))
+            {
+                <div class="v-ar ar">@q.ContactPersonAr</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(q.ContactDetails))
+            {
+                <div class="sub">@q.ContactDetails</div>
+            }
+        </div>
+    </div>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th class="mid" style="width:9mm">#</th>
+                <th>Description <span class="ar">البيان</span></th>
+                <th class="mid" style="width:20mm">Qty <span class="ar">الكمية</span></th>
+                <th class="num" style="width:30mm">Unit Price <span class="ar">سعر الوحدة</span></th>
+                <th class="num" style="width:32mm">Total <span class="ar">الإجمالي</span></th>
+            </tr>
+        </thead>
+        <tbody>
+        @{ var n = 0; }
+        @foreach (var item in q.Items)
+        {
+            n++;
+            <tr>
+                <td class="idx">@n</td>
+                <td>
+                    <div class="desc-en">@item.DescriptionEn</div>
+                    @if (!string.IsNullOrWhiteSpace(item.DescriptionAr))
+                    {
+                        <div class="desc-ar ar">@item.DescriptionAr</div>
+                    }
+                </td>
+                <td class="mid">@item.Quantity.ToString("0.##", inv)</td>
+                <td class="num">@Money(item.UnitPrice)</td>
+                <td class="num total">@Money(item.LineTotal)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="totals-wrap">
+        <table class="totals">
+            <tr class="sub">
+                <td class="k">Total excl. VAT <span class="ar">الإجمالي قبل الضريبة</span></td>
+                <td class="v">@Money(q.TotalExclVat)</td>
+            </tr>
+            <tr class="vat">
+                <td class="k">VAT @q.VatPercent.ToString("0.##", inv)% <span class="ar">ضريبة القيمة المضافة</span></td>
+                <td class="v">@Money(q.VatAmount)</td>
+            </tr>
+            <tr class="grand">
+                <td class="k">Total incl. VAT <span class="ar">الإجمالي شامل الضريبة</span></td>
+                <td class="v">EGP @Money(q.TotalInclVat)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="terms">
+        <div class="block-label">Terms &amp; Conditions <span class="ar">/ الشروط والأحكام</span></div>
+        <div class="rule thin"></div>
+        <div class="terms-grid">
+            @{ var t = 0; }
+            @foreach (var (en, ar) in q.TermLines)
+            {
+                t++;
+                <div>@t. @en</div>
+                <div class="ar">@ar</div>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(q.NoteEn) || !string.IsNullOrWhiteSpace(q.NoteAr))
+    {
+        <div class="note">
+            <div class="block-label">Note <span class="ar">/ ملاحظة</span></div>
+            @if (!string.IsNullOrWhiteSpace(q.NoteEn))
+            {
+                <p>@q.NoteEn</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(q.NoteAr))
+            {
+                <p class="ar">@q.NoteAr</p>
+            }
+        </div>
+    }
+
+    <div class="signatures">
+        <div class="sig">
+            <div class="line">
+                <div class="role">For NOVA <span class="ar">عن نوفا</span></div>
+                <div class="hint">Name · Signature · Stamp · Date</div>
+            </div>
+        </div>
+        <div class="sig">
+            <div class="line">
+                <div class="role">Client Approval <span class="ar">موافقة العميل</span></div>
+                <div class="hint">Name · Signature · Stamp · Date</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div><strong>@co.Name</strong>@(string.IsNullOrWhiteSpace(co.Address) ? "" : " · " + co.Address)</div>
+        <div>@co.Phone · @co.Email · @co.Website · Page 1 of @pages</div>
+    </div>
+
+</div>
+
+@if (q.Images.Count > 0)
+{
+    <!-- ==================== PAGE 2 — Images ==================== -->
+    <div class="sheet">
+
+        <div class="cont-head">
+            <div class="who">NOVA</div>
+            <div class="what">Quotation @q.JobNo · @q.CompanyEn · @q.QuoteDate.ToString("dd MMM yyyy", inv)</div>
+        </div>
+
+        <div class="images">
+            <div class="block-label">Images &amp; References <span class="ar">/ الصور والمرفقات</span></div>
+            <div class="img-grid">
+                @foreach (var img in q.Images)
+                {
+                    <figure class="figure">
+                        <img src="@img.Path" alt="@img.Caption" />
+                        @if (!string.IsNullOrWhiteSpace(img.Caption))
+                        {
+                            <figcaption>@img.Caption</figcaption>
+                        }
+                    </figure>
+                }
+            </div>
+        </div>
+
+        <div class="footer" style="margin-top:auto">
+            <div><strong>@co.Name</strong>@(string.IsNullOrWhiteSpace(co.Address) ? "" : " · " + co.Address)</div>
+            <div>@co.Phone · @co.Email · @co.Website · Page 2 of @pages</div>
+        </div>
+
+    </div>
+}
+
+</body>
+</html>
