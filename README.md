@@ -75,3 +75,4 @@ adjusting the layout without running the app. The live version of that CSS is
 ```bash
 dotnet dotnet-ef migrations add SomeChange --project src/Inova.Quotations
 ```
+# nova_quotation_system
