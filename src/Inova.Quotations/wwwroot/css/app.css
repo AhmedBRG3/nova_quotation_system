@@ -97,6 +97,7 @@ table.rows td{ padding:8px; border-bottom:1px solid var(--line); vertical-align:
 table.rows td.idx{ color:var(--muted); text-align:center; width:34px; padding-top:16px; }
 table.rows .line-total{ font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; padding-top:16px; }
 table.rows .stack{ display:flex; flex-direction:column; gap:6px; }
+table.rows textarea{ min-height:38px; line-height:1.4; padding:7px 9px; }
 
 .totals-box{ margin-top:16px; margin-inline-start:auto; width:340px; }
 .totals-box .row{ display:flex; justify-content:space-between; padding:6px 12px; font-size:13px; }
@@ -122,6 +123,15 @@ table.list .subject{ color:var(--ink); font-weight:600; }
 table.list .sub{ color:var(--muted); font-size:12.5px; }
 table.list .money{ font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink); white-space:nowrap; }
 table.list .actions{ display:flex; gap:6px; justify-content:flex-end; white-space:nowrap; }
+table.list tr.revision-row td{ background:#FBFBFC; }
+table.list tr.revision-row .job{ font-weight:600; }
+table.list .rev-mark{ color:var(--muted); margin-inline-end:4px; }
+table.list .rev-badge{
+  display:inline-block; margin-inline-start:7px; padding:1px 7px;
+  border:1px solid var(--line); border-radius:10px;
+  font-size:10.5px; font-weight:700; color:var(--muted); background:var(--soft);
+}
+.flash.revision{ background:var(--soft); border-color:var(--line); color:var(--body); font-weight:500; }
 
 .empty{ text-align:center; padding:56px 20px; color:var(--muted); }
 .empty p{ margin:0 0 16px; }

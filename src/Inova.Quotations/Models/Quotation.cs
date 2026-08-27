@@ -68,6 +68,13 @@ public class Quotation
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    /// <summary>Set when this quotation is a sub-quotation (revision) of another, e.g. INV-2026-0004.2.</summary>
+    public int? ParentId { get; set; }
+    public Quotation? Parent { get; set; }
+
+    /// <summary>Sub-quotations derived from this one.</summary>
+    public List<Quotation> Revisions { get; set; } = [];
+
     public List<QuotationItem> Items { get; set; } = [];
     public List<QuotationImage> Images { get; set; } = [];
 

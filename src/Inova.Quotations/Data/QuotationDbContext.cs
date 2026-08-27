@@ -27,6 +27,12 @@ public class QuotationDbContext(DbContextOptions<QuotationDbContext> options) : 
              .WithOne(i => i.Quotation)
              .HasForeignKey(i => i.QuotationId)
              .OnDelete(DeleteBehavior.Cascade);
+
+            // Deleting an original must never take its revisions with it.
+            e.HasOne(q => q.Parent)
+             .WithMany(q => q.Revisions)
+             .HasForeignKey(q => q.ParentId)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         b.Entity<QuotationItem>(e =>

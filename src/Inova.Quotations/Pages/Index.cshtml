@@ -43,8 +43,28 @@ else
         <tbody>
         @foreach (var q in Model.Quotations)
         {
-            <tr>
-                <td class="job">@q.JobNo</td>
+            var level = Model.Depth.GetValueOrDefault(q.Id);
+            var revisions = Model.RevisionCount.GetValueOrDefault(q.Id);
+            <tr >
+                <td class="job" ">
+                    @* @if (level > 0)
+                    {
+                        <span class="rev-mark" title="Sub-quotation of @q.Parent?.JobNo">&#8627;</span>
+                    } *@
+                    @q.JobNo
+                    @if (revisions > 0)
+                    {
+                        <details class="rev-dropdown">
+                            <summary class="rev-badge">@revisions rev@(revisions == 1 ? "" : "s")</summary>
+                            <ul>
+                                @foreach (var revision in Model.Quotations.Where(x => x.ParentId == q.Id))
+                                {
+                                    <li><a asp-page="/Quotations/Edit" asp-route-id="@revision.Id">@revision.JobNo</a></li>
+                                }
+                            </ul>
+                        </details>
+                    }
+                </td>
                 <td>
                     <div class="subject">@q.SubjectEn</div>
                     <div class="sub">@q.Items.Count item@(q.Items.Count == 1 ? "" : "s")</div>
@@ -58,6 +78,8 @@ else
                 <td>
                     <div class="actions">
                         <a class="btn sm ghost" asp-page="/Quotations/Edit" asp-route-id="@q.Id">Edit</a>
+                        @* <a class="btn sm ghost" asp-page="/Quotations/Edit" asp-route-reviseFrom="@q.Id"
+                           title="Create a sub-quotation from this one">Revise</a> *@
                         <a class="btn sm ghost" asp-page="/Quotations/Print" asp-route-id="@q.Id" target="_blank">Preview</a>
                         <a class="btn sm dark" href="/quotations/@q.Id/pdf">PDF</a>
                         <form method="post" asp-page-handler="Delete" asp-route-id="@q.Id"

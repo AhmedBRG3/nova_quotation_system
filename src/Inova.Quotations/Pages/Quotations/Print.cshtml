@@ -51,6 +51,10 @@
             <div class="ar">عرض سعر</div>
             <table class="meta">
                 <tr class="job"><td class="k">Job No. / رقم المهمة</td><td class="v">@q.JobNo</td></tr>
+                @* @if (q.Parent is not null)
+                {
+                    <tr><td class="k">Revision of / مراجعة لـ</td><td class="v">@q.Parent.JobNo</td></tr>
+                } *@
                 <tr><td class="k">Date / التاريخ</td><td class="v">@q.QuoteDate.ToString("dd MMM yyyy", inv)</td></tr>
                 <tr><td class="k">Currency / العملة</td><td class="v">EGP — جنيه مصري</td></tr>
                 @if (!string.IsNullOrWhiteSpace(co.TaxNumber))

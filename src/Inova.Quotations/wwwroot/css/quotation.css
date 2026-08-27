@@ -131,8 +131,8 @@ body{
 }
 .items tbody tr:nth-child(even) td{ background:var(--soft); }
 .items tbody td.idx{ color:var(--muted); text-align:center; }
-.items .desc-en{ font-weight:600; color:var(--ink); }
-.items .desc-ar{ font-size:10px; color:var(--muted); }
+.items .desc-en{ font-weight:600; color:var(--ink); white-space:pre-wrap; word-wrap:break-word; }
+.items .desc-ar{ font-size:10px; color:var(--muted); white-space:pre-wrap; word-wrap:break-word; }
 .items td.num{ font-variant-numeric:tabular-nums; white-space:nowrap; }
 .items td.total{ font-weight:700; color:var(--ink); }
 

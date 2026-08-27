@@ -20,6 +20,7 @@ public class PrintModel(QuotationDbContext db) : PageModel
         var quotation = await db.Quotations
             .Include(q => q.Items.OrderBy(i => i.SortOrder))
             .Include(q => q.Images.OrderBy(i => i.SortOrder))
+            .Include(q => q.Parent)
             .AsNoTracking()
             .FirstOrDefaultAsync(q => q.Id == id);
 

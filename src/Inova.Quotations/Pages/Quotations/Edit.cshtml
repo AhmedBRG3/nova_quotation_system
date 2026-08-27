@@ -1,7 +1,9 @@
 @page "/Quotations/Edit/{id:int?}"
 @model Inova.Quotations.Pages.Quotations.EditModel
 @{
-    ViewData["Title"] = Model.IsNew ? "New quotation" : Model.Input.JobNo;
+    ViewData["Title"] = Model.IsRevision
+        ? $"Sub-quotation {Model.Input.JobNo}"
+        : Model.IsNew ? "New quotation" : Model.Input.JobNo;
 }
 
 @if (!string.IsNullOrEmpty(Model.Flash))
@@ -11,17 +13,44 @@
 
 <form method="post" enctype="multipart/form-data" id="quotation-form">
     <input type="hidden" asp-for="Input.Id" />
+    <input type="hidden" asp-for="ReviseFromId" />
 
     <div class="page-head">
-        <h1>@(Model.IsNew ? "New quotation" : $"Quotation {Model.Input.JobNo}")</h1>
+        <h1>
+            @if (Model.IsRevision)
+            {
+                @($"Sub-quotation {Model.Input.JobNo}")
+            }
+            else if (Model.IsNew)
+            {
+                @:New quotation
+            }
+            else
+            {
+                @($"Quotation {Model.Input.JobNo}")
+            }
+        </h1>
         <span class="spacer"></span>
         @if (!Model.IsNew)
         {
             <a class="btn ghost" asp-page="/Quotations/Print" asp-route-id="@Model.Input.Id" target="_blank">Preview</a>
             <a class="btn dark" href="/quotations/@Model.Input.Id/pdf">Download PDF</a>
+            <button class="btn ghost" type="submit" asp-page-handler="Revise"
+                    title="Save these changes as a new sub-quotation, leaving this one untouched">
+                Save as sub-quotation
+            </button>
         }
-        <button class="btn" type="submit">Save</button>
+        <button class="btn" type="submit">@(Model.IsRevision ? "Save sub-quotation" : "Save")</button>
     </div>
+
+    @if (Model.IsRevision && Model.ParentJobNo is not null)
+    {
+        <div class="flash revision">
+            Sub-quotation of <strong>@Model.ParentJobNo</strong>@if (Model.CopiedFromJobNo is not null)
+            {<text>, copied from <a asp-page="/Quotations/Edit" asp-route-id="@Model.ReviseFromId">@Model.CopiedFromJobNo</a></text>}
+            — saving creates a new quotation. Nothing existing is changed.
+        </div>
+    }
 
     <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
@@ -109,13 +138,13 @@
                     <td class="idx"></td>
                     <td>
                         <div class="stack">
-                            <input asp-for="Input.Items[i].DescriptionEn" placeholder="Description (English)" />
-                            <input asp-for="Input.Items[i].DescriptionAr" dir="rtl" placeholder="البيان (عربي)" />
+                            <textarea asp-for="Input.Items[i].DescriptionEn" rows="2" placeholder="Description (English)"></textarea>
+                            <textarea asp-for="Input.Items[i].DescriptionAr" dir="rtl" rows="2" placeholder="البيان (عربي)"></textarea>
                             <span asp-validation-for="Input.Items[i].DescriptionEn" class="validation-message"></span>
                         </div>
                     </td>
-                    <td><input asp-for="Input.Items[i].Quantity" class="qty" type="number" step="0.01" min="0" /></td>
-                    <td><input asp-for="Input.Items[i].UnitPrice" class="price" type="number" step="0.01" min="0" /></td>
+                    <td><input asp-for="Input.Items[i].Quantity" class="qty" type="number" step="1.0" min="0" /></td>
+                    <td><input asp-for="Input.Items[i].UnitPrice" class="price" type="number" step="1.0" min="0" /></td>
                     <td class="num line-total">0.00</td>
                     <td><button type="button" class="btn sm danger remove-row" title="Remove">✕</button></td>
                 </tr>
@@ -200,6 +229,10 @@
     <div class="page-head">
         <a class="btn ghost" asp-page="/Index">Back to list</a>
         <span class="spacer"></span>
+        <button class="btn ghost" type="submit" asp-page-handler="Revise"
+        title="Save these changes as a new sub-quotation, leaving this one untouched">
+        Save as sub-quotation
+        </button>
         <button class="btn" type="submit">Save quotation</button>
     </div>
 </form>
@@ -215,12 +248,12 @@
         <td class="idx"></td>
         <td>
             <div class="stack">
-                <input name="Input.Items[__i__].DescriptionEn" placeholder="Description (English)" type="text" />
-                <input name="Input.Items[__i__].DescriptionAr" dir="rtl" placeholder="البيان (عربي)" type="text" />
+                <textarea name="Input.Items[__i__].DescriptionEn" rows="2" placeholder="Description (English)"></textarea>
+                <textarea name="Input.Items[__i__].DescriptionAr" dir="rtl" rows="2" placeholder="البيان (عربي)"></textarea>
             </div>
         </td>
-        <td><input name="Input.Items[__i__].Quantity" class="qty" type="number" step="0.01" min="0" value="1" /></td>
-        <td><input name="Input.Items[__i__].UnitPrice" class="price" type="number" step="0.01" min="0" value="0" /></td>
+        <td><input name="Input.Items[__i__].Quantity" class="qty" type="number" step="1.0" min="0" value="1" /></td>
+        <td><input name="Input.Items[__i__].UnitPrice" class="price" type="number" step="1.0" min="0" value="0" /></td>
         <td class="num line-total">0.00</td>
         <td><button type="button" class="btn sm danger remove-row" title="Remove">✕</button></td>
     </tr>
@@ -238,7 +271,7 @@
     function reindex() {
         body.querySelectorAll('tr.item-row').forEach((row, i) => {
             row.querySelector('.idx').textContent = i + 1;
-            row.querySelectorAll('input').forEach(input => {
+            row.querySelectorAll('input, textarea').forEach(input => {
                 if (input.name) input.name = input.name.replace(/Input\.Items\[\d+\]/, `Input.Items[${i}]`);
                 input.removeAttribute('id');
             });
@@ -270,7 +303,7 @@
         body.insertAdjacentHTML('beforeend', html);
         reindex();
         recalc();
-        body.lastElementChild.querySelector('input').focus();
+        body.lastElementChild.querySelector('textarea, input').focus();
     });
 
     body.addEventListener('click', e => {
