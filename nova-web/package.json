@@ -1,0 +1,12 @@
+{
+  "name": "nova-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NOVA Marketing & Advertising Agency — animated 'under process' loading screen.",
+  "scripts": {
+    "dev": "python3 -m http.server 5173",
+    "start": "npm run dev",
+    "build": "node build.js",
+    "preview": "python3 -m http.server 5174 --directory build"
+  }
+}
