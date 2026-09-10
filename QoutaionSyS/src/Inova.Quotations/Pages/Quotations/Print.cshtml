@@ -6,7 +6,10 @@
     var q = Model.Quotation;
     var co = Model.Company;
     var inv = CultureInfo.InvariantCulture;
-    var pages = q.Images.Count > 0 ? 2 : 1;
+    // Four images to a sheet (2x2). More than that spills onto further sheets.
+    const int imagesPerSheet = 4;
+    var imageSheets = q.Images.Chunk(imagesPerSheet).ToList();
+    var pages = 1 + imageSheets.Count;
     string Money(decimal d) => d.ToString("N2", inv);
 }
 <!DOCTYPE html>
@@ -199,9 +202,9 @@
 
 </div>
 
-@if (q.Images.Count > 0)
+@* ==================== IMAGE SHEETS — four to a page ==================== *@
+@for (var s = 0; s < imageSheets.Count; s++)
 {
-    <!-- ==================== PAGE 2 — Images ==================== -->
     <div class="sheet">
 
         <div class="cont-head">
@@ -212,10 +215,15 @@
         <div class="images">
             <div class="block-label">Images &amp; References <span class="ar">/ الصور والمرفقات</span></div>
             <div class="img-grid">
-                @foreach (var img in q.Images)
+                @foreach (var img in imageSheets[s])
                 {
                     <figure class="figure">
-                        <img src="@img.Path" alt="@img.Caption" />
+                        @* Chrome's print-to-PDF keeps this anchor as a real PDF link annotation.
+                           It is a bonus for viewers that honour them — Safari's PDF viewer does not,
+                           which is why the image is embedded uncropped and large enough to zoom instead. *@
+                        <a href="@(Model.BaseUrl + img.Path)" target="_blank" rel="noopener">
+                            <img src="@img.Path" alt="@img.Caption" />
+                        </a>
                         @if (!string.IsNullOrWhiteSpace(img.Caption))
                         {
                             <figcaption>@img.Caption</figcaption>
@@ -227,7 +235,7 @@
 
         <div class="footer" style="margin-top:auto">
             <div><strong>@co.Name</strong>@(string.IsNullOrWhiteSpace(co.Address) ? "" : " · " + co.Address)</div>
-            <div>@co.Phone · @co.Email · @co.Website · Page 2 of @pages</div>
+            <div>@co.Phone · @co.Email · @co.Website · Page @(s + 2) of @pages</div>
         </div>
 
     </div>

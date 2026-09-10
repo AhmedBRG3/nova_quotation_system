@@ -130,7 +130,26 @@ table.list .rev-badge{
   display:inline-block; margin-inline-start:7px; padding:1px 7px;
   border:1px solid var(--line); border-radius:10px;
   font-size:10.5px; font-weight:700; color:var(--muted); background:var(--soft);
+  cursor:pointer; list-style:none;
 }
+table.list .rev-badge::-webkit-details-marker{ display:none; }
+table.list details[open] .rev-badge{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+/* Revisions have no row of their own, so this panel carries their full action set. */
+.rev-dropdown{ display:inline; }
+.rev-dropdown ul{
+  list-style:none; margin:8px 0 2px; padding:6px 0 2px;
+  border-top:1px solid var(--line); font-weight:400;
+}
+.rev-dropdown li{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  padding:4px 0; white-space:nowrap;
+}
+.rev-dropdown .rev-no{ font-weight:700; color:var(--red); }
+.rev-dropdown .rev-meta{ color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+.rev-dropdown .rev-actions{ display:flex; gap:8px; margin-inline-start:auto; }
+.rev-dropdown .rev-actions a{ color:var(--body); font-size:12px; text-decoration:none; border-bottom:1px solid var(--line); }
+.rev-dropdown .rev-actions a:hover{ color:var(--red); border-color:var(--red); }
 .flash.revision{ background:var(--soft); border-color:var(--line); color:var(--body); font-weight:500; }
 
 .empty{ text-align:center; padding:56px 20px; color:var(--muted); }

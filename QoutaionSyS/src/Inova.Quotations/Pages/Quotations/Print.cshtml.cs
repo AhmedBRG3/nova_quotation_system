@@ -15,6 +15,13 @@ public class PrintModel(QuotationDbContext db) : PageModel
     [BindProperty(SupportsGet = true)]
     public bool Bare { get; set; }
 
+    /// <summary>
+    /// Scheme and host of the request that rendered this page, e.g. "https://quotes.example.com".
+    /// Image links in the PDF must be absolute: a relative href would resolve against the
+    /// file:// location the reader opened the download from, and break.
+    /// </summary>
+    public string BaseUrl { get; private set; } = "";
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var quotation = await db.Quotations
@@ -28,6 +35,7 @@ public class PrintModel(QuotationDbContext db) : PageModel
 
         Quotation = quotation;
         Company = await db.CompanyProfiles.AsNoTracking().FirstAsync();
+        BaseUrl = $"{Request.Scheme}://{Request.Host}";
         return Page();
     }
 }

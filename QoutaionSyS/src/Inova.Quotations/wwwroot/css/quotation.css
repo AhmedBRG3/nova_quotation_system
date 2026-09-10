@@ -173,11 +173,17 @@ body{
 
 /* ---------- Images ---------- */
 .images{ margin-top:6mm; }
-.img-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5mm; margin-top:4px; }
+/* Two per row, four per sheet. Bigger on the page means more pixels survive into the
+   PDF, so the reader's own zoom is enough to inspect an image — no server round-trip. */
+.img-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:6mm; margin-top:4px; align-items:start; }
 .figure{ break-inside:avoid; }
+/* The tile also links to the full-size original, which viewers that honour link
+   annotations will open. Strip the link chrome so the sheet looks untouched. */
+.figure a{ display:block; text-decoration:none; color:inherit; cursor:zoom-in; }
 .figure img{
-  width:100%; aspect-ratio:4/3; object-fit:cover;
-  display:block; border:1px solid var(--line);
+  /* contain, never cover: cropping here would discard the detail before it reaches the PDF. */
+  width:100%; height:auto; max-height:205mm; object-fit: contain;
+  display:block; border:1px solid var(--line); background:var(--soft);
 }
 .figure figcaption{ margin-top:3px; font-size:9px; color:var(--muted); }
 
