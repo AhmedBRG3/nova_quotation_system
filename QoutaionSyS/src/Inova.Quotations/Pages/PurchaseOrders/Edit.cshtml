@@ -1,9 +1,7 @@
-@page "/Quotations/Edit/{id:int?}"
-@model Inova.Quotations.Pages.Quotations.EditModel
+@page "/PurchaseOrders/Edit/{id:int?}"
+@model Inova.Quotations.Pages.PurchaseOrders.EditModel
 @{
-    ViewData["Title"] = Model.IsRevision
-        ? $"Sub-quotation {Model.Input.JobNo}"
-        : Model.IsNew ? "New quotation" : Model.Input.JobNo;
+    ViewData["Title"] = Model.IsNew ? "New purchase order" : Model.Input.PoNo;
 }
 
 @if (!string.IsNullOrEmpty(Model.Flash))
@@ -11,44 +9,27 @@
     <div class="flash">@Model.Flash</div>
 }
 
-<form method="post" enctype="multipart/form-data" id="quotation-form">
+<form method="post" id="po-form">
     <input type="hidden" asp-for="Input.Id" />
-    <input type="hidden" asp-for="ReviseFromId" />
+    <input type="hidden" asp-for="Input.QuotationId" />
 
     <div class="page-head">
-        <h1>
-            @if (Model.IsRevision)
-            {
-                @($"Sub-quotation {Model.Input.JobNo}")
-            }
-            else if (Model.IsNew)
-            {
-                @:New quotation
-            }
-            else
-            {
-                @($"Quotation {Model.Input.JobNo}")
-            }
-        </h1>
+        <h1>@(Model.IsNew ? "New purchase order" : $"Purchase order {Model.Input.PoNo}")</h1>
         <span class="spacer"></span>
         @if (!Model.IsNew)
         {
-            <a class="btn ghost" asp-page="/Quotations/Print" asp-route-id="@Model.Input.Id" target="_blank">Preview</a>
-            <a class="btn dark" href="/quotations/@Model.Input.Id/pdf">Download PDF</a>
-            <button class="btn ghost" type="submit" asp-page-handler="Revise"
-                    title="Save these changes as a new sub-quotation, leaving this one untouched">
-                Save as sub-quotation
-            </button>
+            <a class="btn ghost" asp-page="/PurchaseOrders/Print" asp-route-id="@Model.Input.Id" target="_blank">Preview</a>
+            <a class="btn dark" href="/purchase-orders/@Model.Input.Id/pdf">Download PDF</a>
         }
-        <button class="btn" type="submit">@(Model.IsRevision ? "Save sub-quotation" : "Save")</button>
+        <button class="btn" type="submit">Save</button>
     </div>
 
-    @if (Model.IsRevision && Model.ParentJobNo is not null)
+    @if (Model.QuotationJobNo is not null)
     {
         <div class="flash revision">
-            Sub-quotation of <strong>@Model.ParentJobNo</strong>@if (Model.CopiedFromJobNo is not null)
-            {<text>, copied from <a asp-page="/Quotations/Edit" asp-route-id="@Model.ReviseFromId">@Model.CopiedFromJobNo</a></text>}
-            — saving creates a new quotation. Nothing existing is changed.
+            Procuring for quotation
+            <strong><a asp-page="/Quotations/Edit" asp-route-id="@Model.Input.QuotationId">@Model.QuotationJobNo</a></strong>
+            — line items were copied across with prices cleared, so enter what the <em>vendor</em> charges.
         </div>
     }
 
@@ -61,17 +42,17 @@
     <div asp-validation-summary="All"></div>
 
     <div class="card">
-        <h2>Quotation details</h2>
+        <h2>Purchase order details</h2>
         <div class="grid3">
             <div class="field">
-                <label asp-for="Input.JobNo">Job No. <span class="req">*</span></label>
-                <input asp-for="Input.JobNo" />
-                <span asp-validation-for="Input.JobNo" class="validation-message"></span>
+                <label asp-for="Input.PoNo">PO No. <span class="req">*</span></label>
+                <input asp-for="Input.PoNo" />
+                <span asp-validation-for="Input.PoNo" class="validation-message"></span>
             </div>
             <div class="field">
-                <label asp-for="Input.QuoteDate">Date <span class="req">*</span></label>
-                <input asp-for="Input.QuoteDate" type="date" />
-                <span asp-validation-for="Input.QuoteDate" class="validation-message"></span>
+                <label asp-for="Input.PoDate">Date <span class="req">*</span></label>
+                <input asp-for="Input.PoDate" type="date" />
+                <span asp-validation-for="Input.PoDate" class="validation-message"></span>
             </div>
             <div class="field">
                 <label asp-for="Input.VatPercent">VAT % <span class="req">*</span></label>
@@ -94,31 +75,35 @@
     </div>
 
     <div class="card">
-        <h2>Prepared for</h2>
+        <h2>Vendor</h2>
         <div class="grid2">
             <div class="field">
-                <label asp-for="Input.CompanyEn">Company — English <span class="req">*</span></label>
-                <input asp-for="Input.CompanyEn" />
-                <span asp-validation-for="Input.CompanyEn" class="validation-message"></span>
+                <label asp-for="Input.VendorNameEn">Vendor — English <span class="req">*</span></label>
+                <input asp-for="Input.VendorNameEn" />
+                <span asp-validation-for="Input.VendorNameEn" class="validation-message"></span>
             </div>
             <div class="field">
-                <label asp-for="Input.CompanyAr">اسم الشركة — Arabic</label>
-                <input asp-for="Input.CompanyAr" dir="rtl" />
+                <label asp-for="Input.VendorNameAr">اسم المورد — Arabic</label>
+                <input asp-for="Input.VendorNameAr" dir="rtl" />
             </div>
             <div class="field">
-                <label asp-for="Input.ContactPersonEn">Contact person — English <span class="req">*</span></label>
-                <input asp-for="Input.ContactPersonEn" />
-                <span asp-validation-for="Input.ContactPersonEn" class="validation-message"></span>
+                <label asp-for="Input.VendorContactPersonEn">Contact person — English</label>
+                <input asp-for="Input.VendorContactPersonEn" />
             </div>
             <div class="field">
-                <label asp-for="Input.ContactPersonAr">اسم الشخص المسؤول — Arabic</label>
-                <input asp-for="Input.ContactPersonAr" dir="rtl" />
+                <label asp-for="Input.VendorContactPersonAr">اسم الشخص المسؤول — Arabic</label>
+                <input asp-for="Input.VendorContactPersonAr" dir="rtl" />
             </div>
         </div>
-        <div class="field" style="margin-top:14px">
-            <label asp-for="Input.ContactDetails">Job title / phone</label>
-            <input asp-for="Input.ContactDetails" placeholder="Marketing Manager · +20 100 000 0000" />
-            <span class="hint">Printed as a small grey line under the contact name.</span>
+        <div class="grid2" style="margin-top:14px">
+            <div class="field">
+                <label asp-for="Input.VendorContactDetails">Job title / phone</label>
+                <input asp-for="Input.VendorContactDetails" placeholder="Sales Manager · +20 100 000 0000" />
+            </div>
+            <div class="field">
+                <label asp-for="Input.VendorTaxNumber">Vendor tax number</label>
+                <input asp-for="Input.VendorTaxNumber" />
+            </div>
         </div>
     </div>
 
@@ -176,7 +161,7 @@
             <textarea asp-for="Input.Terms" rows="7"></textarea>
             <span class="hint">
                 One clause per line. Put the Arabic after a <strong>|</strong> to fill the right-hand column:
-                <code>Valid for 30 days. | صالح لمدة ٣٠ يوماً.</code>
+                <code>Delivery within 14 days. | التسليم خلال ١٤ يوماً.</code>
             </span>
             <span asp-validation-for="Input.Terms" class="validation-message"></span>
         </div>
@@ -196,58 +181,12 @@
         </div>
     </div>
 
-    <div class="card">
-        <h2>Images <span style="color:var(--muted); font-weight:600; letter-spacing:0; text-transform:none">— optional, printed on page 2</span></h2>
-
-        @if (Model.Images.Count > 0)
-        {
-            <div class="thumbs">
-                @for (var i = 0; i < Model.Images.Count; i++)
-                {
-                    var image = Model.Images[i];
-                    <div class="thumb">
-                        <img src="@image.Path" alt="@image.Caption" />
-                        <div class="cap">
-                            <input type="hidden" name="ExistingImages[@i].Id" value="@image.Id" />
-                            <input type="text" name="ExistingImages[@i].Caption" value="@image.Caption" placeholder="Caption" />
-                            <label style="font-size:12px; display:flex; gap:6px; align-items:center; color:var(--red)">
-                                <input type="checkbox" name="ExistingImages[@i].Delete" value="true" style="width:auto" />
-                                Remove
-                            </label>
-                        </div>
-                    </div>
-                }
-            </div>
-            <div style="height:16px"></div>
-        }
-
-        <div class="field">
-            <label asp-for="NewImages">Add images</label>
-            <input asp-for="NewImages" type="file" multiple accept="image/*" id="new-images" />
-            <span class="hint">JPG, PNG, WEBP or GIF · up to 8 MB each · three across on the printed page. Click any thumbnail to preview it full size.</span>
-            <span asp-validation-for="NewImages" class="validation-message"></span>
-        </div>
-
-        <!-- Previews for files picked but not yet saved — the only thumbnails a new quotation has. -->
-        <div class="thumbs" id="new-previews" style="margin-top:14px"></div>
-    </div>
-
     <div class="page-head">
-        <a class="btn ghost" asp-page="/Index">Back to list</a>
+        <a class="btn ghost" asp-page="/PurchaseOrders/Index">Back to list</a>
         <span class="spacer"></span>
-        <button class="btn ghost" type="submit" asp-page-handler="Revise"
-        title="Save these changes as a new sub-quotation, leaving this one untouched">
-        Save as sub-quotation
-        </button>
-        <button class="btn" type="submit">Save quotation</button>
+        <button class="btn" type="submit">Save purchase order</button>
     </div>
 </form>
-
-<div class="lightbox" id="lightbox" hidden>
-    <button type="button" class="lb-close" id="lb-close" aria-label="Close preview">&times;</button>
-    <img id="lb-img" src="" alt="" />
-    <div class="lb-cap" id="lb-cap"></div>
-</div>
 
 <template id="row-template">
     <tr class="item-row">
@@ -323,78 +262,10 @@
         recalc();
     });
 
-    document.getElementById('quotation-form').addEventListener('input', recalc);
+    document.getElementById('po-form').addEventListener('input', recalc);
 
     reindex();
     recalc();
-
-    // ---- Image preview -------------------------------------------------
-    const lightbox = document.getElementById('lightbox');
-    const lbImg    = document.getElementById('lb-img');
-    const lbCap    = document.getElementById('lb-cap');
-
-    function openLightbox(src, caption) {
-        lbImg.src = src;
-        lbImg.alt = caption || '';
-        lbCap.textContent = caption || '';
-        lightbox.hidden = false;
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLightbox() {
-        lightbox.hidden = true;
-        lbImg.src = '';
-        document.body.style.overflow = '';
-    }
-
-    lightbox.addEventListener('click', closeLightbox);
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && !lightbox.hidden) closeLightbox();
-    });
-
-    // Saved thumbnails: caption comes from the text box next to the image, so the
-    // preview shows whatever the user has typed rather than the stale saved value.
-    document.querySelectorAll('.thumb img').forEach(img => {
-        img.addEventListener('click', () => {
-            const box = img.closest('.thumb').querySelector('input[type="text"]');
-            openLightbox(img.src, box ? box.value : img.alt);
-        });
-    });
-
-    // Files chosen but not yet uploaded — rendered from object URLs.
-    const fileInput  = document.getElementById('new-images');
-    const previewBox = document.getElementById('new-previews');
-    let objectUrls   = [];
-
-    fileInput.addEventListener('change', () => {
-        objectUrls.forEach(URL.revokeObjectURL);
-        objectUrls = [];
-        previewBox.textContent = '';
-
-        for (const file of fileInput.files) {
-            if (!file.type.startsWith('image/')) continue;
-
-            const url = URL.createObjectURL(file);
-            objectUrls.push(url);
-
-            const cell = document.createElement('div');
-            cell.className = 'thumb';
-
-            const img = document.createElement('img');
-            img.src = url;
-            img.alt = file.name;
-            img.addEventListener('click', () => openLightbox(url, file.name));
-
-            const cap = document.createElement('div');
-            cap.className = 'cap';
-            cap.style.fontSize = '12px';
-            cap.style.color = 'var(--muted)';
-            cap.textContent = file.name;
-
-            cell.append(img, cap);
-            previewBox.appendChild(cell);
-        }
-    });
 })();
 </script>
 }

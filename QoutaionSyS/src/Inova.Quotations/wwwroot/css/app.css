@@ -84,6 +84,16 @@ input:focus, textarea:focus, select:focus{
 }
 textarea{ resize:vertical; min-height:78px; }
 .validation-message, .field-error{ color:var(--red); font-size:12px; }
+/* Only the error state carries this class — ASP.NET emits validation-summary-valid when
+   there is nothing to report, so this panel never shows up empty. */
+.validation-summary-errors{
+  background:#FDF0F1; border:1px solid #F2C4C8; border-inline-start:3px solid var(--red);
+  border-radius:6px; padding:12px 14px; margin-bottom:16px;
+}
+.validation-summary-errors::before{
+  content:"Nothing was saved — please fix the following:";
+  display:block; font-weight:700; color:var(--red); font-size:13px; margin-bottom:6px;
+}
 .validation-summary-errors ul{ margin:0; padding-inline-start:18px; color:var(--red); }
 
 /* ---------- Item rows ---------- */

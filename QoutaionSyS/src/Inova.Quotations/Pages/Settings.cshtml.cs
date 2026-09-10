@@ -39,6 +39,7 @@ public class SettingsModel(QuotationDbContext db, IWebHostEnvironment env) : Pag
         profile.TaxNumber = string.IsNullOrWhiteSpace(Input.TaxNumber) ? null : Input.TaxNumber.Trim();
         profile.DefaultVatPercent = Input.DefaultVatPercent;
         profile.DefaultTerms = Input.DefaultTerms.Trim();
+        profile.DefaultPoTerms = (Input.DefaultPoTerms ?? "").Trim();
 
         if (LogoFile is { Length: > 0 })
         {

@@ -87,6 +87,19 @@
         </div>
     </div>
 
+    <div class="card">
+        <h2>Default purchase order terms</h2>
+        <div class="field">
+            <label asp-for="Input.DefaultPoTerms">Loaded into every new purchase order, then editable per order</label>
+            <textarea asp-for="Input.DefaultPoTerms" rows="9"></textarea>
+            <span class="hint">
+                Kept separate from the quotation terms — what you require of a vendor differs from
+                what you promise a client. Same format:
+                <code>Delivery within 14 days. | التسليم خلال ١٤ يوماً.</code>
+            </span>
+        </div>
+    </div>
+
     <div class="page-head">
         <span class="spacer"></span>
         <button class="btn" type="submit">Save settings</button>

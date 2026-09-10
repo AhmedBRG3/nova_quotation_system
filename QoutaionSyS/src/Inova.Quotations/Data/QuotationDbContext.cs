@@ -9,6 +9,8 @@ public class QuotationDbContext(DbContextOptions<QuotationDbContext> options) : 
     public DbSet<QuotationItem> QuotationItems => Set<QuotationItem>();
     public DbSet<QuotationImage> QuotationImages => Set<QuotationImage>();
     public DbSet<CompanyProfile> CompanyProfiles => Set<CompanyProfile>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -48,6 +50,31 @@ public class QuotationDbContext(DbContextOptions<QuotationDbContext> options) : 
         {
             e.ToTable("company_profile");
             e.Property(c => c.DefaultVatPercent).HasPrecision(5, 2);
+        });
+
+        b.Entity<PurchaseOrder>(e =>
+        {
+            e.ToTable("purchase_orders");
+            e.HasIndex(p => p.PoNo).IsUnique();
+            e.Property(p => p.VatPercent).HasPrecision(5, 2);
+
+            e.HasMany(p => p.Items)
+             .WithOne(i => i.PurchaseOrder)
+             .HasForeignKey(i => i.PurchaseOrderId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            // Deleting a quotation must never delete orders already placed against it.
+            e.HasOne(p => p.Quotation)
+             .WithMany()
+             .HasForeignKey(p => p.QuotationId)
+             .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        b.Entity<PurchaseOrderItem>(e =>
+        {
+            e.ToTable("purchase_order_items");
+            e.Property(i => i.Quantity).HasPrecision(12, 2);
+            e.Property(i => i.UnitPrice).HasPrecision(14, 2);
         });
     }
 }

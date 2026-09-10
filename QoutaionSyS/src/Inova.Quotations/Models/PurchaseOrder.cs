@@ -3,14 +3,29 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Inova.Quotations.Models;
 
-public class Quotation
+/// <summary>
+/// An order placed with a vendor to procure what a quotation promised the client.
+/// One quotation can spawn several, e.g. one per vendor.
+/// </summary>
+public class PurchaseOrder
 {
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Job No. is required")]
+    [Required(ErrorMessage = "PO No. is required")]
     [StringLength(40)]
-    [Display(Name = "Job No.")]
-    public string JobNo { get; set; } = "";
+    [Display(Name = "PO No.")]
+    public string PoNo { get; set; } = "";
+
+    [Required(ErrorMessage = "Date is required")]
+    [Display(Name = "Date")]
+    public DateOnly PoDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
+    /// <summary>
+    /// The quotation this order procures for. Nullable, and nulled rather than cascaded when
+    /// that quotation is deleted — a placed order still happened and must not vanish with it.
+    /// </summary>
+    public int? QuotationId { get; set; }
+    public Quotation? Quotation { get; set; }
 
     [Required(ErrorMessage = "Subject is required")]
     [StringLength(300)]
@@ -21,40 +36,38 @@ public class Quotation
     [Display(Name = "Subject (Arabic)")]
     public string? SubjectAr { get; set; }
 
-    [Required(ErrorMessage = "Date is required")]
-    [Display(Name = "Date")]
-    public DateOnly QuoteDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    // ---- Vendor. Free text, exactly as the client details are on a quotation. ----
 
-    [Required(ErrorMessage = "Company name is required")]
+    [Required(ErrorMessage = "Vendor name is required")]
     [StringLength(200)]
-    [Display(Name = "Company (English)")]
-    public string CompanyEn { get; set; } = "";
+    [Display(Name = "Vendor (English)")]
+    public string VendorNameEn { get; set; } = "";
 
     [StringLength(200)]
-    [Display(Name = "Company (Arabic)")]
-    public string? CompanyAr { get; set; }
+    [Display(Name = "Vendor (Arabic)")]
+    public string? VendorNameAr { get; set; }
 
-    [Required(ErrorMessage = "Contact person is required")]
     [StringLength(200)]
     [Display(Name = "Contact person (English)")]
-    public string ContactPersonEn { get; set; } = "";
+    public string? VendorContactPersonEn { get; set; }
 
     [StringLength(200)]
     [Display(Name = "Contact person (Arabic)")]
-    public string? ContactPersonAr { get; set; }
+    public string? VendorContactPersonAr { get; set; }
 
     [StringLength(200)]
     [Display(Name = "Job title / phone")]
-    public string? ContactDetails { get; set; }
+    public string? VendorContactDetails { get; set; }
+
+    [StringLength(60)]
+    [Display(Name = "Vendor tax number")]
+    public string? VendorTaxNumber { get; set; }
 
     [Range(0, 100)]
     [Display(Name = "VAT %")]
     public decimal VatPercent { get; set; } = 14m;
 
-    /// <summary>
-    /// One clause per line. Split on '|' gives the English and Arabic halves:
-    /// "This quotation is valid for 30 days. | هذا العرض صالح لمدة ٣٠ يوماً."
-    /// </summary>
+    /// <summary>One clause per line, "English | Arabic" — see <see cref="TermsText"/>.</summary>
     [Required(ErrorMessage = "Terms &amp; conditions are required")]
     [Display(Name = "Terms & Conditions")]
     public string Terms { get; set; } = "";
@@ -68,15 +81,7 @@ public class Quotation
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    /// <summary>Set when this quotation is a sub-quotation (revision) of another, e.g. INV-2026-0004.2.</summary>
-    public int? ParentId { get; set; }
-    public Quotation? Parent { get; set; }
-
-    /// <summary>Sub-quotations derived from this one.</summary>
-    public List<Quotation> Revisions { get; set; } = [];
-
-    public List<QuotationItem> Items { get; set; } = [];
-    public List<QuotationImage> Images { get; set; } = [];
+    public List<PurchaseOrderItem> Items { get; set; } = [];
 
     // ---- Computed money. Never stored: always derived from the item rows. ----
 

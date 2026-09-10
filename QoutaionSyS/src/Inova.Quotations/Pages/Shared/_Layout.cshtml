@@ -11,10 +11,20 @@
         <div class="brand">NOVA<small>Marketing &amp; Advertising</small></div>
         <nav>
             <a asp-page="/Index">Quotations</a>
+            <a asp-page="/PurchaseOrders/Index">Purchase Orders</a>
             <a asp-page="/Settings">Settings</a>
         </nav>
         <span class="spacer"></span>
-        <a class="btn sm" asp-page="/Quotations/Edit">+ New quotation</a>
+        @* The primary action follows the section you are in, so the Purchase Orders tab
+           never offers "new quotation" as its most prominent button. *@
+        @if ((ViewContext.HttpContext.Request.Path.Value ?? "").StartsWith("/PurchaseOrders", StringComparison.OrdinalIgnoreCase))
+        {
+            <a class="btn sm" asp-page="/PurchaseOrders/Edit">+ New purchase order</a>
+        }
+        else
+        {
+            <a class="btn sm" asp-page="/Quotations/Edit">+ New quotation</a>
+        }
     </header>
 
     <main class="wrap">

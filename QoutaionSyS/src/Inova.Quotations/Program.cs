@@ -60,6 +60,41 @@ app.MapGet("/quotations/{id:int}/pdf", async (
     }
 });
 
+// Same trick for purchase orders — PdfService only ever needs a URL to render.
+app.MapGet("/purchase-orders/{id:int}/pdf", async (
+    int id,
+    HttpContext http,
+    QuotationDbContext db,
+    PdfService pdf,
+    ILoggerFactory loggerFactory,
+    CancellationToken ct) =>
+{
+    var poNo = await db.PurchaseOrders
+        .Where(p => p.Id == id)
+        .Select(p => p.PoNo)
+        .FirstOrDefaultAsync(ct);
+
+    if (poNo is null) return Results.NotFound();
+
+    var printUrl = $"{http.Request.Scheme}://{http.Request.Host}/PurchaseOrders/Print/{id}?bare=true";
+
+    var logger = loggerFactory.CreateLogger("PdfDownload");
+    try
+    {
+        var bytes = await pdf.RenderAsync(printUrl, ct);
+        var safePoNo = string.Concat(poNo.Split(Path.GetInvalidFileNameChars()));
+        return Results.File(bytes, "application/pdf", $"PurchaseOrder-{safePoNo}.pdf");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "PDF render failed for purchase order {Id} at {Url}.", id, printUrl);
+        return Results.Problem(
+            title: "Could not generate the PDF",
+            detail: $"{ex.GetType().Name}: {ex.Message}",
+            statusCode: StatusCodes.Status500InternalServerError);
+    }
+});
+
 // Uploaded images live under wwwroot/uploads.
 Directory.CreateDirectory(Path.Combine(app.Environment.WebRootPath, "uploads"));
 

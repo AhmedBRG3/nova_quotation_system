@@ -1,0 +1,207 @@
+@page "/PurchaseOrders/Print/{id:int}"
+@model Inova.Quotations.Pages.PurchaseOrders.PrintModel
+@using System.Globalization
+@{
+    Layout = null;
+    var po = Model.PurchaseOrder;
+    var co = Model.Company;
+    var inv = CultureInfo.InvariantCulture;
+    string Money(decimal d) => d.ToString("N2", inv);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@po.PoNo — @po.VendorNameEn</title>
+    @* The quotation sheet styles are document-generic — masthead, items, totals, terms,
+       signatures and footer are all reused here rather than duplicated. *@
+    <link rel="stylesheet" href="~/css/quotation.css" asp-append-version="true" />
+</head>
+<body>
+
+@if (!Model.Bare)
+{
+    <div class="toolbar">
+        <h1>@po.PoNo</h1>
+        <span class="meta-note">@po.VendorNameEn · @po.PoDate.ToString("dd MMM yyyy", inv) · EGP · @po.VatPercent.ToString("0.##", inv)% VAT</span>
+        <span class="spacer"></span>
+        <a class="ghost" asp-page="/PurchaseOrders/Edit" asp-route-id="@po.Id">Edit</a>
+        <a href="/purchase-orders/@po.Id/pdf">Download PDF</a>
+    </div>
+}
+
+<div class="sheet">
+
+    <div class="masthead">
+        <div class="logo">
+            @if (!string.IsNullOrWhiteSpace(co.LogoPath))
+            {
+                <img class="logo-img" src="@co.LogoPath" alt="@co.Name" />
+            }
+            else
+            {
+                <div class="word">NOVA</div>
+                <div class="tag">Marketing &amp; Advertising Agency</div>
+            }
+        </div>
+
+        <div class="doc-title">
+            <div class="en">Purchase Order</div>
+            <div class="ar">أمر شراء</div>
+            <table class="meta">
+                <tr class="job"><td class="k">PO No. / رقم الأمر</td><td class="v">@po.PoNo</td></tr>
+                @if (po.Quotation is not null)
+                {
+                    <tr><td class="k">For quotation / لعرض سعر</td><td class="v">@po.Quotation.JobNo</td></tr>
+                }
+                <tr><td class="k">Date / التاريخ</td><td class="v">@po.PoDate.ToString("dd MMM yyyy", inv)</td></tr>
+                <tr><td class="k">Currency / العملة</td><td class="v">EGP — جنيه مصري</td></tr>
+                @if (!string.IsNullOrWhiteSpace(co.TaxNumber))
+                {
+                    <tr><td class="k">Tax No. / الرقم الضريبي</td><td class="v">@co.TaxNumber</td></tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <div class="rule"></div>
+
+    <div class="subject">
+        <div class="block-label">Subject <span class="ar">/ الموضوع</span></div>
+        <div class="v">@po.SubjectEn</div>
+        @if (!string.IsNullOrWhiteSpace(po.SubjectAr))
+        {
+            <div class="v-ar ar">@po.SubjectAr</div>
+        }
+    </div>
+
+    <div class="prepared">
+        <div>
+            <div class="block-label">Supplier <span class="ar">/ المورد</span></div>
+            <div class="v">@po.VendorNameEn</div>
+            @if (!string.IsNullOrWhiteSpace(po.VendorNameAr))
+            {
+                <div class="v-ar ar">@po.VendorNameAr</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(po.VendorTaxNumber))
+            {
+                <div class="sub">Tax No. @po.VendorTaxNumber</div>
+            }
+        </div>
+        <div>
+            <div class="block-label">Contact Person <span class="ar">/ الشخص المسؤول</span></div>
+            <div class="v">@po.VendorContactPersonEn</div>
+            @if (!string.IsNullOrWhiteSpace(po.VendorContactPersonAr))
+            {
+                <div class="v-ar ar">@po.VendorContactPersonAr</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(po.VendorContactDetails))
+            {
+                <div class="sub">@po.VendorContactDetails</div>
+            }
+        </div>
+    </div>
+
+    <table class="items">
+        <thead>
+            <tr>
+                <th class="mid" style="width:9mm">#</th>
+                <th>Description <span class="ar">البيان</span></th>
+                <th class="mid" style="width:20mm">Qty <span class="ar">الكمية</span></th>
+                <th class="num" style="width:30mm">Unit Price <span class="ar">سعر الوحدة</span></th>
+                <th class="num" style="width:32mm">Total <span class="ar">الإجمالي</span></th>
+            </tr>
+        </thead>
+        <tbody>
+        @{ var n = 0; }
+        @foreach (var item in po.Items)
+        {
+            n++;
+            <tr>
+                <td class="idx">@n</td>
+                <td>
+                    <div class="desc-en">@item.DescriptionEn</div>
+                    @if (!string.IsNullOrWhiteSpace(item.DescriptionAr))
+                    {
+                        <div class="desc-ar ar">@item.DescriptionAr</div>
+                    }
+                </td>
+                <td class="mid">@item.Quantity.ToString("0.##", inv)</td>
+                <td class="num">@Money(item.UnitPrice)</td>
+                <td class="num total">@Money(item.LineTotal)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="totals-wrap">
+        <table class="totals">
+            <tr class="sub">
+                <td class="k">Total excl. VAT <span class="ar">الإجمالي قبل الضريبة</span></td>
+                <td class="v">@Money(po.TotalExclVat)</td>
+            </tr>
+            <tr class="vat">
+                <td class="k">VAT @po.VatPercent.ToString("0.##", inv)% <span class="ar">ضريبة القيمة المضافة</span></td>
+                <td class="v">@Money(po.VatAmount)</td>
+            </tr>
+            <tr class="grand">
+                <td class="k">Total incl. VAT <span class="ar">الإجمالي شامل الضريبة</span></td>
+                <td class="v">EGP @Money(po.TotalInclVat)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="terms">
+        <div class="block-label">Terms &amp; Conditions <span class="ar">/ الشروط والأحكام</span></div>
+        <div class="rule thin"></div>
+        <div class="terms-grid">
+            @{ var t = 0; }
+            @foreach (var (en, ar) in po.TermLines)
+            {
+                t++;
+                <div>@t. @en</div>
+                <div class="ar">@ar</div>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(po.NoteEn) || !string.IsNullOrWhiteSpace(po.NoteAr))
+    {
+        <div class="note">
+            <div class="block-label">Note <span class="ar">/ ملاحظة</span></div>
+            @if (!string.IsNullOrWhiteSpace(po.NoteEn))
+            {
+                <p>@po.NoteEn</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(po.NoteAr))
+            {
+                <p class="ar">@po.NoteAr</p>
+            }
+        </div>
+    }
+
+    <div class="signatures">
+        <div class="sig">
+            <div class="line">
+                <div class="role">For NOVA <span class="ar">عن نوفا</span></div>
+                <div class="hint">Name · Signature · Stamp · Date</div>
+            </div>
+        </div>
+        <div class="sig">
+            <div class="line">
+                <div class="role">Supplier Acceptance <span class="ar">موافقة المورد</span></div>
+                <div class="hint">Name · Signature · Stamp · Date</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div><strong>@co.Name</strong>@(string.IsNullOrWhiteSpace(co.Address) ? "" : " · " + co.Address)</div>
+        <div>@co.Phone · @co.Email · @co.Website · Page 1 of 1</div>
+    </div>
+
+</div>
+
+</body>
+</html>

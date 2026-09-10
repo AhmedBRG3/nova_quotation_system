@@ -81,6 +81,8 @@ else
                 <td>
                     <div class="actions">
                         <a class="btn sm ghost" asp-page="/Quotations/Edit" asp-route-id="@q.Id">Edit</a>
+                        <a class="btn sm ghost" asp-page="/PurchaseOrders/Edit" asp-route-fromQuotation="@q.Id"
+                           title="Raise a purchase order to procure for this quotation">PO</a>
                         @* <a class="btn sm ghost" asp-page="/Quotations/Edit" asp-route-reviseFrom="@q.Id"
                            title="Create a sub-quotation from this one">Revise</a> *@
                         <a class="btn sm ghost" asp-page="/Quotations/Print" asp-route-id="@q.Id" target="_blank">Preview</a>

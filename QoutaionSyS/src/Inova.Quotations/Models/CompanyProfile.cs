@@ -40,4 +40,11 @@ public class CompanyProfile
     /// <summary>Loaded into every new quotation, then editable per job. One clause per line, "English | Arabic".</summary>
     [Display(Name = "Default terms & conditions")]
     public string DefaultTerms { get; set; } = "";
+
+    /// <summary>
+    /// Loaded into every new purchase order. Kept separate from <see cref="DefaultTerms"/> because
+    /// what you promise a client and what you require of a vendor are rarely the same clauses.
+    /// </summary>
+    [Display(Name = "Default purchase order terms")]
+    public string DefaultPoTerms { get; set; } = "";
 }

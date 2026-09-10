@@ -1,0 +1,87 @@
+@page "/PurchaseOrders"
+@model Inova.Quotations.Pages.PurchaseOrders.IndexModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Purchase Orders";
+    var inv = CultureInfo.InvariantCulture;
+}
+
+@if (!string.IsNullOrEmpty(Model.Flash))
+{
+    <div class="flash">@Model.Flash</div>
+}
+
+<div class="page-head">
+    <h1>Purchase Orders</h1>
+    <span class="spacer"></span>
+    <form method="get" style="display:flex; gap:8px;">
+        <input type="text" name="q" value="@Model.Q" placeholder="Search PO no., subject or vendor" style="width:280px" />
+        <button class="btn ghost" type="submit">Search</button>
+    </form>
+    @* Standalone order: procurement that isn't tied to any quotation. The other route in
+       is the "PO" action on a quotation row, which pre-fills from that quotation. *@
+    <a class="btn" asp-page="/PurchaseOrders/Edit">+ New purchase order</a>
+</div>
+
+@if (Model.PurchaseOrders.Count == 0)
+{
+    <div class="card empty">
+        <p>@(string.IsNullOrWhiteSpace(Model.Q) ? "No purchase orders yet." : "Nothing matched that search.")</p>
+        <a class="btn" asp-page="/PurchaseOrders/Edit">Create the first purchase order</a>
+    </div>
+}
+else
+{
+    <table class="list">
+        <thead>
+            <tr>
+                <th style="width:130px">PO No.</th>
+                <th>Subject</th>
+                <th style="width:210px">Vendor</th>
+                <th style="width:140px">For quotation</th>
+                <th style="width:110px">Date</th>
+                <th class="num" style="width:140px">Total incl. VAT</th>
+                <th style="width:230px"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var po in Model.PurchaseOrders)
+        {
+            <tr>
+                <td class="job">@po.PoNo</td>
+                <td>
+                    <div class="subject">@po.SubjectEn</div>
+                    <div class="sub">@po.Items.Count item@(po.Items.Count == 1 ? "" : "s")</div>
+                </td>
+                <td>
+                    <div>@po.VendorNameEn</div>
+                    <div class="sub">@po.VendorContactPersonEn</div>
+                </td>
+                <td>
+                    @if (po.Quotation is not null)
+                    {
+                        <a asp-page="/Quotations/Edit" asp-route-id="@po.QuotationId">@po.Quotation.JobNo</a>
+                    }
+                    else
+                    {
+                        <span class="sub">—</span>
+                    }
+                </td>
+                <td>@po.PoDate.ToString("dd MMM yyyy", inv)</td>
+                <td class="num money">@po.TotalInclVat.ToString("N2", inv)</td>
+                <td>
+                    <div class="actions">
+                        <a class="btn sm ghost" asp-page="/PurchaseOrders/Edit" asp-route-id="@po.Id">Edit</a>
+                        <a class="btn sm ghost" asp-page="/PurchaseOrders/Print" asp-route-id="@po.Id" target="_blank">Preview</a>
+                        <a class="btn sm dark" href="/purchase-orders/@po.Id/pdf">PDF</a>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@po.Id"
+                              onsubmit="return confirm('Delete purchase order @po.PoNo? This cannot be undone.');">
+                            <button class="btn sm danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
