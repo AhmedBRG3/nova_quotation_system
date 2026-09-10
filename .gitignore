@@ -2,12 +2,16 @@ bin/
 obj/
 *.user
 
+# Matched with **/ rather than a rooted path: these rules were once anchored to
+# src/Inova.Quotations/..., and silently stopped matching when the project moved
+# into QoutaionSyS/ — which is how the real connection string got committed.
+
 # Uploaded logos and quotation images
-src/Inova.Quotations/wwwroot/uploads/
+**/wwwroot/uploads/
 
 # Local secrets (connection strings with real passwords)
-appsettings.Local.json
+**/appsettings.Local.json
 
 # Real connection string lives here — never commit it
-src/Inova.Quotations/appsettings.Development.json
+**/appsettings.Development.json
 .DS_Store

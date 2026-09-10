@@ -172,20 +172,28 @@ body{
 .note p.ar{ color:var(--muted); margin-top:2px; }
 
 /* ---------- Images ---------- */
-.images{ margin-top:6mm; }
-/* Two per row, four per sheet. Bigger on the page means more pixels survive into the
-   PDF, so the reader's own zoom is enough to inspect an image — no server round-trip. */
-.img-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:6mm; margin-top:4px; align-items:start; }
-.figure{ break-inside:avoid; }
+/* Four to a sheet in a fixed 2x2 grid. The grid claims whatever height the sheet has
+   left over, so each cell is exactly a quarter of the image area and the page is always
+   filled. Bigger on the page means more pixels survive into the PDF, which is what makes
+   the reader's own zoom enough to inspect an image — no server round-trip. */
+.images{ margin-top:6mm; display:flex; flex-direction:column; flex:1; min-height:0; }
+.img-grid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  grid-template-rows:repeat(2, 1fr);
+  gap:6mm; margin-top:4px; flex:1; min-height:0;
+}
+.figure{ break-inside:avoid; display:flex; flex-direction:column; min-height:0; }
 /* The tile also links to the full-size original, which viewers that honour link
    annotations will open. Strip the link chrome so the sheet looks untouched. */
-.figure a{ display:block; text-decoration:none; color:inherit; cursor:zoom-in; }
+.figure a{ flex:1; min-height:0; display:block; text-decoration:none; color:inherit; cursor:zoom-in; }
 .figure img{
-  /* contain, never cover: cropping here would discard the detail before it reaches the PDF. */
-  width:100%; height:auto; max-height:205mm; object-fit: contain;
+  /* contain, never cover: cropping here would discard the detail before it reaches the PDF.
+     Filling the cell height is what makes each image a true quarter-page. */
+  width:100%; height:100%; object-fit:contain;
   display:block; border:1px solid var(--line); background:var(--soft);
 }
-.figure figcaption{ margin-top:3px; font-size:9px; color:var(--muted); }
+.figure figcaption{ flex:none; margin-top:3px; font-size:9px; color:var(--muted); }
 
 /* ---------- Signatures ---------- */
 .signatures{ display:grid; grid-template-columns:1fr 1fr; gap:14mm; margin-top:auto; padding-top:9mm; }
