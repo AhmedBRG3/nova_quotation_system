@@ -6,8 +6,8 @@
     var q = Model.Quotation;
     var co = Model.Company;
     var inv = CultureInfo.InvariantCulture;
-    // Four images to a sheet (2x2). More than that spills onto further sheets.
-    const int imagesPerSheet = 4;
+    // Six images to a sheet (3x2). More than that spills onto further sheets.
+    const int imagesPerSheet = 6;
     var imageSheets = q.Images.Chunk(imagesPerSheet).ToList();
     var pages = 1 + imageSheets.Count;
     string Money(decimal d) => d.ToString("N2", inv);
