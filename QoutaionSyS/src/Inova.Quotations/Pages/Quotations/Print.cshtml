@@ -6,8 +6,9 @@
     var q = Model.Quotation;
     var co = Model.Company;
     var inv = CultureInfo.InvariantCulture;
-    // Six images to a sheet (3x2). More than that spills onto further sheets.
-    const int imagesPerSheet = 6;
+    // Fifteen images to a sheet (3 across, 5 down) — as many as a continuation page holds at
+    // the tile size the grid uses. More than that spills onto further sheets.
+    const int imagesPerSheet = 15;
     var imageSheets = q.Images.Chunk(imagesPerSheet).ToList();
     var pages = 1 + imageSheets.Count;
     string Money(decimal d) => d.ToString("N2", inv);
@@ -202,7 +203,7 @@
 
 </div>
 
-@* ==================== IMAGE SHEETS — four to a page ==================== *@
+@* ==================== IMAGE SHEETS — a full page of them at a time ==================== *@
 @for (var s = 0; s < imageSheets.Count; s++)
 {
     <div class="sheet">

@@ -172,7 +172,7 @@ body{
 .note p.ar{ color:var(--muted); margin-top:2px; }
 
 /* ---------- Images ---------- */
-/* Six to a sheet in a 3x2 grid. Rows are sized by their content and packed to the top of
+/* Six to a sheet in a 3x15 grid. Rows are sized by their content and packed to the top of
    whatever height the sheet has left: a wide screenshot in a narrow column is short, and
    stretching its tile to a full row height would only frame it in empty background.
    Bigger on the page means more pixels survive into the PDF, which is what makes the
